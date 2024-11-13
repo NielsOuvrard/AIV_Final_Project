@@ -7,6 +7,7 @@ import pygame
 
 from src.config import *
 from src.game_states import MainState, State
+from src.entities.player import Player
 
 
 class Button:
@@ -33,16 +34,21 @@ class Button:
 class gameMenu(State):
     def __init__(self):
         self.next_state: MainState | None = None
+        self.player: Player = Player()
 
     def update(self) -> None:
-        pass
+        self.player.animate(0.1)
+        self.player.move_and_slide()
 
     def draw(self, screen: pygame.Surface) -> None:
         screen.fill(COLOR_BLACK)
+        self.player.draw(screen)
+
 
     def handle_event(self, event: pygame.event.Event) -> None:
         if event.type == pygame.QUIT:
             self.next_state = MainState.QUIT
+        self.player.handle_event(event)
 
 class mainMenu(State):
     def __init__(self):

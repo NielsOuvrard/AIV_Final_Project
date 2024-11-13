@@ -1,0 +1,26 @@
+#
+# @ Author: Niels Ouvrard - Diego Jiménez Ontiveros - Santiago Arreola Munguia
+# @ Create Time: 2024-11-13 13:27:13
+# @ Description:
+#
+
+# mario.toml
+
+[animations]
+frame_width = 16
+frame_height = 16
+
+[animations.idle]
+frame_count = 1
+y_position = 32
+x_positions = [178]
+
+[animations.walk]
+frame_count = 3
+y_position = 32
+x_positions = [80, 96, 112]
+
+[animations.jump]
+frame_count = 1
+y_position = 32
+x_positions = [144]
