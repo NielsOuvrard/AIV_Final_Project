@@ -5,31 +5,33 @@
  '''
 
 import pygame
+from src.config import *
+from src.ui.menu import mainMenu, gameMenu
+from src.game_states import MainState, State
 
 
 if __name__ == '__main__':
     pygame.init()
-    screen = pygame.display.set_mode((800, 600))
-    pygame.display.set_caption('Hello World!')
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    pygame.display.set_caption(WINDOW_TITLE)
 
-    # Set up font
-    font = pygame.font.Font(None, 74)
-    text = font.render('works', True, (255, 255, 255))
-    text_rect = text.get_rect(center=(400, 300))
+    actualState: State = mainMenu()
 
     running = True
     while running:
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
+            actualState.handle_event(event)
 
-        # Clear the screen
-        screen.fill((0, 0, 0))
+        actualState.update()
+        actualState.draw(screen)
 
-        # Draw the text
-        screen.blit(text, text_rect)
+        if actualState.next_state == MainState.GAME:
+            actualState = gameMenu()
+        elif actualState.next_state == MainState.MAIN_MENU:
+            actualState = mainMenu()
+        elif actualState.next_state == MainState.QUIT:
+            running = False
 
-        # Update the display
         pygame.display.flip()
 
     pygame.quit()
