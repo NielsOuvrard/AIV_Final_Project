@@ -24,9 +24,6 @@ pip install -r requirements.txt
 
 > [!NOTE]\
 > We use pygame library, it needs SDL2 library to be installed.
-> MacOS: `brew install sdl2 sdl2_image sdl2_mixer sdl2_ttf`
-> Ubuntu: `sudo apt-get install libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev`
-> Windows: Download and install the SDL2 development libraries from the [SDL2 website](https://www.libsdl.org/download-2.0.php). Make sure to follow the instructions for setting up the environment variables.
 
 ## Usage
 
