@@ -3,6 +3,8 @@
  # @ Create Time: 2024-11-12 19:32:22
  # @ Description:
  '''
+
+import pygame
 from src.config import *
 from enum import Enum
 
@@ -13,13 +15,13 @@ class MainState(Enum):
 
 class State:
     def __init__(self):
-        self.next_state = None
+        self.next_state: MainState | None = None
 
-    def update(self):
+    def update(self) -> None:
         pass
 
-    def draw(self, screen):
+    def draw(self, screen: pygame.Surface) -> None:
         pass
 
-    def handle_event(self, event):
+    def handle_event(self, event: pygame.event.Event) -> None:
         pass

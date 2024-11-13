@@ -17,7 +17,7 @@ if __name__ == '__main__':
 
     actualState: State = mainMenu()
 
-    running = True
+    running: bool = True
     while running:
         for event in pygame.event.get():
             actualState.handle_event(event)
