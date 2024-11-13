@@ -30,7 +30,7 @@ pip install -r requirements.txt
 To run the game, you need to execute the following command.
 
 ```bash
-python3 src/main.py
+python3 -m src.main
 ```
 
 ## Testing
