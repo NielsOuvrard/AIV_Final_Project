@@ -1,1 +1,1 @@
-pygame-ce # Comunity Edition, works better on Apple Silicon
+pygame-ce==2.5.2 # Comunity Edition, works better on Apple Silicon
