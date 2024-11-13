@@ -1,0 +1,1 @@
+pygame-ce # Comunity Edition, works better on Apple Silicon
