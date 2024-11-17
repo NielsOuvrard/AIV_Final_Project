@@ -5,8 +5,8 @@
  '''
 
 import pygame
-from src.config import *
-from src.ui.menu import mainMenu, gameMenu
+from src.config import SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_TITLE
+from src.ui.menu import MainMenu, GameMenu
 from src.game_states import MainState, State
 
 
@@ -15,7 +15,7 @@ if __name__ == '__main__':
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption(WINDOW_TITLE)
 
-    actualState: State = mainMenu()
+    actualState: State = MainMenu()
 
     running: bool = True
     while running:
@@ -26,11 +26,11 @@ if __name__ == '__main__':
         actualState.draw(screen)
 
         if actualState.next_state == MainState.GAME:
-            actualState = gameMenu()
+            actualState = GameMenu()
         elif actualState.next_state == MainState.MAIN_MENU:
-            actualState = mainMenu()
+            actualState = MainMenu()
         elif actualState.next_state == MainState.QUIT:
-            running = False
+            running = False # pylint: disable=invalid-name
 
         pygame.display.flip()
 

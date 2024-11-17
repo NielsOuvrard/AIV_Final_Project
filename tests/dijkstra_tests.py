@@ -1,8 +1,20 @@
+'''
+ # @ Author: Niels Ouvrard - Diego Jiménez Ontiveros - Santiago Arreola Munguia
+ # @ Create Time: 2024-11-13 14:42:19
+ # @ Description:
+    This file contains unit tests for the Dijkstra algorithm implementation. It verifies
+    the correctness of the algorithm by comparing the computed shortest paths and distances
+    against expected values for various graph configurations.
+ '''
+
 import unittest
 import copy
-from src.core.dijkstra import Node, Graph, dijkstra
+from src.core.dijkstra import Node, Graph, dijkstra # pylint: disable=import-error
 
 class TestDijkstra(unittest.TestCase):
+    """
+    Test class for the Dijkstra algorithm implementation.
+    """
     def setUp(self):
         self.graphs = [
             Graph({
@@ -38,6 +50,9 @@ class TestDijkstra(unittest.TestCase):
         ]
 
     def test_dijkstra_graph_1(self):
+        """
+        Test the Dijkstra algorithm on the following graph:
+        """
         graph = self.graphs[0]
         expected_distances = {
             'A': {
@@ -74,6 +89,9 @@ class TestDijkstra(unittest.TestCase):
 
 
     def test_dijkstra_graph_2(self):
+        """
+        Test the Dijkstra algorithm on the following graph:
+        """
         graph = self.graphs[1]
         expected_distances = {
             'A': {
@@ -108,6 +126,9 @@ class TestDijkstra(unittest.TestCase):
                 self.assertEqual(distances[node].path, expected_distances[start][node].path)
 
     def test_dijkstra_graph_3(self):
+        """
+        Test the Dijkstra algorithm on the following graph:
+        """
         graph = self.graphs[2]
         expected_distances = {
             'A': {
@@ -166,6 +187,9 @@ class TestDijkstra(unittest.TestCase):
                 self.assertEqual(distances[node].path, expected_distances[start][node].path)
 
     def test_dijkstra_graph_4(self):
+        """
+        Test the Dijkstra algorithm on the following graph:
+        """
         graph = self.graphs[3]
         expected_distances = {
             'A': {

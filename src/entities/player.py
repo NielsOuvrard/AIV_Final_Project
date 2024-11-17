@@ -4,15 +4,18 @@
  # @ Description:
  '''
 
-import pygame
+import pygame as pg
 import toml
 from src.config import SCALING_FACTOR, SCREEN_HEIGHT, GRAVITY
 
-class Player(pygame.sprite.Sprite):
+class Player(pg.sprite.Sprite):
+    """
+    Player class to represent the player character
+    """
     def __init__(self):
         super().__init__()
 
-        self.sprite_sheet = pygame.image.load("assets/mario_bros.png").convert_alpha()
+        self.sprite_sheet = pg.image.load("assets/mario_bros.png").convert_alpha()
         self.animations = {}
         self.current_animation = 'idle'
         self.animation_speed = 0.1
@@ -23,36 +26,44 @@ class Player(pygame.sprite.Sprite):
         # debug
         self.ground_y = SCREEN_HEIGHT - (SCREEN_HEIGHT // 3)
 
-        self.position = pygame.Vector2(100, self.ground_y)
-        self.velocity = pygame.Vector2(0, 0)
-        self.acceleration = pygame.Vector2(0, 0)
-        
-    def get_frame(self, sprite_sheet: pygame.Surface, x: int, y: int, width: int, height: int) -> pygame.Surface:
-        frame = pygame.Surface((width, height), pygame.SRCALPHA)
-        frame.blit(sprite_sheet, (0, 0), (x, y, width, height))
+        self.position = pg.Vector2(100, self.ground_y)
+        self.velocity = pg.Vector2(0, 0)
+        self.acceleration = pg.Vector2(0, 0)
+
+        self.image = self.animations[self.current_animation][self.frame_index]
+
+    def get_frame(self, sprite_sheet: pg.Surface, position: tuple[int, int], size: tuple[int, int]) -> pg.Surface:
+        frame = pg.Surface(size, pg.SRCALPHA)
+        frame.blit(sprite_sheet, (0, 0), (*position, *size))
         return frame
 
     def load_animations(self):
+        """
+        Load animations from a TOML file
+        """
         config = toml.load('assets/mario_bros.toml')
         frame_width = config['animations']['frame_width']
         frame_height = config['animations']['frame_height']
 
         for animation_name, animation_data in config['animations'].items():
-            if animation_name == 'frame_width' or animation_name == 'frame_height':
+            if animation_name in {'frame_width', 'frame_height'}:
                 continue
 
-            frame_count = animation_data['frame_count']
+            _ = animation_data['frame_count']
             y_position = animation_data['y_position']
             x_positions = animation_data['x_positions']
 
             frames = []
             for x in x_positions:
-                frame = self.get_frame(self.sprite_sheet, x, y_position, frame_width, frame_height)
+                frame = self.get_frame(self.sprite_sheet, (x, y_position), (frame_width, frame_height))
                 frames.append(frame)
             self.animations[animation_name] = frames
-            
+
 
     def move_and_slide(self):
+        """
+        Move the player character and apply gravity
+        """
         # Update velocity with acceleration
         self.velocity += self.acceleration
 
@@ -78,45 +89,53 @@ class Player(pygame.sprite.Sprite):
             self.velocity.x = 0
 
     def animate(self, dt: float):
+        """
+        Animate the player character sprite
+        """
         # Update animation time
         self.animation_time += dt
-        
+
         # Change frame when enough time has passed
         if self.animation_time >= self.animation_speed:
             self.animation_time = 0
             self.frame_index += 1
-            
+
             # Loop back to start of animation
             if self.frame_index >= len(self.animations[self.current_animation]):
                 self.frame_index = 0
-                
+
             # Update sprite image
             self.image = self.animations[self.current_animation][self.frame_index]
-    
+
     def change_animation(self, animation_name: str):
         self.current_animation = animation_name
         self.frame_index = 0
 
-    def handle_event(self, event: pygame.event.Event):
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
+    def handle_event(self, event: pg.event.Event):
+        """
+        Handle player character events
+        Which are: jump, walk
+        """
+        if event.type == pg.KEYDOWN:
+            if event.key == pg.K_SPACE:
                 self.change_animation('jump')
                 self.acceleration.y = -5
-            if event.key == pygame.K_RIGHT:
+            if event.key == pg.K_RIGHT:
                 self.change_animation('walk')
                 self.acceleration.x = 0.1
-            if event.key == pygame.K_LEFT:
+            if event.key == pg.K_LEFT:
                 self.change_animation('walk')
                 self.acceleration.x = -0.1
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_RIGHT or event.key == pygame.K_LEFT:
+        if event.type == pg.KEYUP:
+            if event.key in {pg.K_RIGHT, pg.K_LEFT}:
                 self.acceleration.x = 0
 
-    def draw(self, screen: pygame.Surface):
+    def draw(self, screen: pg.Surface):
         if self.velocity.x < 0:
-            self.image = pygame.transform.flip(self.image, True, False)
+            self.image = pg.transform.flip(self.image, True, False)
         else:
-            self.image = pygame.transform.flip(self.image, False, False)
-        screen.blit(pygame.transform.scale(self.image,
-                                          (self.image.get_width() * SCALING_FACTOR, self.image.get_height() * SCALING_FACTOR)),
+            self.image = pg.transform.flip(self.image, False, False)
+        screen.blit(pg.transform.scale(self.image,
+                                          (self.image.get_width() * SCALING_FACTOR,
+                                           self.image.get_height() * SCALING_FACTOR)),
                    (self.position.x, self.position.y))
