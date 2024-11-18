@@ -30,7 +30,7 @@ class Player(pg.sprite.Sprite):
         self.velocity = pg.Vector2(0, 0)
         self.acceleration = pg.Vector2(0, 0)
 
-        self.image = self.animations[self.current_animation][self.frame_index]
+        self.image: pg.Surface = self.animations[self.current_animation][self.frame_index]
 
     def get_frame(self, sprite_sheet: pg.Surface, position: tuple[int, int], size: tuple[int, int]) -> pg.Surface:
         frame = pg.Surface(size, pg.SRCALPHA)

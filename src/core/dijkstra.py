@@ -8,7 +8,7 @@ class Node:
     """
     Node class to represent a node in the graph
     """
-    def __init__(self, name: str, dist: float = float('infinity'), path: list[str] = None) -> None:
+    def __init__(self, name: str, dist: float = float('infinity'), path: list[str] | None = None) -> None:
         self.name = name
         self.dist = dist
         self.path = path if path is not None else []
