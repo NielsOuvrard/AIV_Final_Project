@@ -72,18 +72,19 @@ def snap_position(
     # pylint: disable=fixme
     # todo see how to choose the right object
 
-    if {CornerSide.TOP_LEFT, CornerSide.BOTTOM_LEFT}.issubset(sides):
-        position.x = objects[0].x + objects[0].size_x +1
+    if {CornerSide.BOTTOM_LEFT, CornerSide.BOTTOM_RIGHT}.issubset(sides):
+        position.y = objects[0].y - image.get_height() * SCALING_FACTOR
+        velocity.y = 0
+        # change_animation('idle' if velocity.x == 0 else 'walk')
+    elif {CornerSide.TOP_LEFT, CornerSide.BOTTOM_LEFT}.issubset(sides):
+        position.x = objects[0].x + objects[0].size_x
         velocity.x = 0
     elif {CornerSide.TOP_RIGHT, CornerSide.BOTTOM_RIGHT}.issubset(sides):
         position.x = objects[0].x - image.get_width() * SCALING_FACTOR -1
         velocity.x = 0
-    elif CornerSide.TOP_LEFT in sides or CornerSide.TOP_RIGHT in sides:
+    elif {CornerSide.TOP_LEFT, CornerSide.TOP_RIGHT}.issubset(sides):
         position.y = objects[0].y + objects[0].size_y
         velocity.y = GRAVITY
-    elif CornerSide.BOTTOM_LEFT in sides or CornerSide.BOTTOM_RIGHT in sides:
-        position.y = objects[0].y - image.get_height() * SCALING_FACTOR
-        velocity.y = 0
 
 
 def handle_collision(level: Level, position: pg.Vector2, image: pg.Surface, velocity: pg.Vector2) -> None:
@@ -93,8 +94,8 @@ def handle_collision(level: Level, position: pg.Vector2, image: pg.Surface, velo
     player = ObjectCollision(
         position.x,
         position.y,
-        int(image.get_width() * SCALING_FACTOR),
-        int(image.get_height() * SCALING_FACTOR)
+        image.get_width() * SCALING_FACTOR,
+        image.get_height() * SCALING_FACTOR
     ) # 100.0, 546.0 with size 32, 32
 
     sides_colliding: set[CornerSide] = set()

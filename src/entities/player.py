@@ -26,10 +26,10 @@ class Player(Entity):
                 self.acceleration.y = -5
             if event.key == pg.K_RIGHT:
                 self.change_animation('walk')
-                self.acceleration.x = 0.08
+                self.acceleration.x = 0.02
             if event.key == pg.K_LEFT:
                 self.change_animation('walk')
-                self.acceleration.x = -0.08
+                self.acceleration.x = -0.02
         if event.type == pg.KEYUP:
             if event.key in {pg.K_RIGHT, pg.K_LEFT}:
                 self.acceleration.x = 0

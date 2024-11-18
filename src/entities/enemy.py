@@ -5,6 +5,7 @@
  '''
 
 from enum import Enum
+import pygame as pg
 from src.entities.entity import Entity
 from src.entities.player import Player
 from src.config import TILE_SIZE
