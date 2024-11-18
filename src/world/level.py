@@ -23,6 +23,7 @@ class Level:
         self.layout: list[str] = layout
         self.start_position: tuple[int, int] = start_position
         self.enemies: list[tuple[int, int]] = enemies
+        self.tile_size = TILE_SIZE
 
 
 class LevelHandler:
@@ -32,7 +33,7 @@ class LevelHandler:
     def __init__(self) -> None:
         self.levels: list[Level] = []
         self.load_levels(TOML_FILE)
-        self.current_level: Level = self.levels[0]
+        self.current_level: Level = self.levels[1]
 
     def load_levels(self, toml_file: str) -> None:
         """

@@ -7,6 +7,7 @@
 import pygame as pg
 import toml
 from src.config import SCALING_FACTOR, SCREEN_HEIGHT, GRAVITY
+from src.world.level import Level
 
 class Player(pg.sprite.Sprite):
     """
@@ -24,7 +25,8 @@ class Player(pg.sprite.Sprite):
         self.load_animations()
 
         # debug
-        self.ground_y = SCREEN_HEIGHT - (SCREEN_HEIGHT // 3)
+        self.ground_y = SCREEN_HEIGHT - (SCREEN_HEIGHT // 11)
+        self.in_ground = False
 
         self.position = pg.Vector2(100, self.ground_y)
         self.velocity = pg.Vector2(0, 0)
@@ -60,7 +62,7 @@ class Player(pg.sprite.Sprite):
             self.animations[animation_name] = frames
 
 
-    def move_and_slide(self):
+    def move_and_slide(self, level: Level):
         """
         Move the player character and apply gravity
         """
@@ -87,6 +89,88 @@ class Player(pg.sprite.Sprite):
         if self.velocity.x < 0.01 and self.velocity.x > -0.01:
             self.change_animation('idle')
             self.velocity.x = 0
+
+        x1y1 = self.position
+        x2y1 = pg.Vector2(self.position.x + self.image.get_width()*SCALING_FACTOR ,self.position.y)
+        x1y2 = pg.Vector2(self.position.x, self.position.y + self.image.get_height()*SCALING_FACTOR)
+        x2y2 = pg.Vector2(self.position.x + self.image.get_width()*SCALING_FACTOR, self.position.y + self.image.get_height()*SCALING_FACTOR)
+
+        tile_size = level.tile_size
+
+        up1, up2, ri1, ri2, dw1, dw2, le1, le2 = [False]*8
+        x_snap = 0
+        y_snap = 0
+        for i, row in enumerate(level.layout):
+            for x, tile in enumerate(row):
+                if tile == '#':
+                    if (x1y1.x > x*tile_size and x1y1.x < (x*tile_size+tile_size) and x1y1.y > i*tile_size and x1y1.y < (i*tile_size+tile_size)):
+                        up1 = True
+                        le1 = True
+                        x_snap = x
+                        y_snap = i
+                    if (x2y1.x > x*tile_size and x2y1.x < (x*tile_size+tile_size) and x2y1.y > i*tile_size and x2y1.y < (i*tile_size+tile_size)):
+                        up2 = True
+                        ri1 = True
+                        x_snap = x
+                        y_snap = i
+                    if (x1y2.x > x*tile_size and x1y2.x < (x*tile_size+tile_size) and x1y2.y > i*tile_size and x1y2.y < (i*tile_size+tile_size)):
+                        dw1 = True
+                        le2 = True
+                        x_snap = x
+                        y_snap = i
+                    if (x2y2.x > x*tile_size and x2y2.x < (x*tile_size+tile_size) and x2y2.y > i*tile_size and x2y2.y < (i*tile_size+tile_size)):
+                        dw2 = True
+                        ri2 = True
+                        x_snap = x
+                        y_snap = i
+        if ri1 and ri2:
+            self.position = pg.Vector2(x_snap*tile_size-self.image.get_width()*SCALING_FACTOR, self.position.y)
+            self.acceleration.x = 0
+            print("right")
+        elif le1 and le2:
+            self.position = pg.Vector2(x_snap*tile_size, self.position.y)
+            self.acceleration.x = 0
+            print("left")
+        elif up1 or up2:
+            self.position = pg.Vector2(self.position.x , y_snap*tile_size+tile_size)
+            self.acceleration.y = 0
+            print("up")
+        elif (dw1 or dw2): 
+            self.position = pg.Vector2(self.position.x , y_snap*tile_size-self.image.get_height()*SCALING_FACTOR)
+            self.acceleration.y = 0
+            self.in_ground = True
+            self.velocity.y = 0
+            # print("down")
+        
+
+
+
+                    # #collision with ceiling
+                    # if (x1y1.x > x*tile_size and x1y1.x < (x*tile_size+tile_size) and x1y1.y > i*tile_size and x1y1.y < (i*tile_size+tile_size)) and (x2y1.x > x*tile_size and x2y1.x < (x*tile_size+tile_size) and x2y1.y > i*tile_size and x2y1.y < (i*tile_size+tile_size)):
+                    #     self.position = pg.Vector2(self.position.x , i*tile_size+tile_size)
+                    #     self.acceleration.y = 0
+                    #     print("up")
+                    # #collision with right wall
+                    # if (x2y1.x > x*tile_size and x2y1.x < (x*tile_size+tile_size) and x2y1.y > i*tile_size and x2y1.y < (i*tile_size+tile_size)) and (x2y2.x > x*tile_size and x2y2.x < (x*tile_size+tile_size) and x2y2.y > i*tile_size and x2y2.y < (i*tile_size+tile_size)):
+                    #     self.position = pg.Vector2(x*tile_size-self.image.get_width()*SCALING_FACTOR, self.position.y)
+                    #     self.acceleration.x = 0
+                    #     print("right")
+                    # #collision with floor
+                    # if (x1y2.x > x*tile_size and x1y2.x < (x*tile_size+tile_size) and x1y2.y > i*tile_size and x1y2.y < (i*tile_size+tile_size)) and (x2y2.x > x*tile_size and x2y2.x < (x*tile_size+tile_size) and x2y2.y > i*tile_size and x2y2.y < (i*tile_size+tile_size)):
+                    #     self.position = pg.Vector2(self.position.x , i*tile_size-self.image.get_height()*SCALING_FACTOR)
+                    #     self.acceleration.y = 0
+                    #     self.in_ground = True
+                    #     self.velocity.y = 0
+                    #     print("down")
+                    # #collision with left wall
+                    # if (x1y1.x > x*tile_size and x1y1.x < (x*tile_size+tile_size) and x1y1.y > i*tile_size and x1y1.y < (i*tile_size+tile_size)) and (x1y2.x > x*tile_size and x1y2.x < (x*tile_size+tile_size) and x1y2.y > i*tile_size and x1y2.y < (i*tile_size+tile_size)):
+                    #     self.position = pg.Vector2(x*tile_size+tile_size, self.position.y)
+                    #     self.acceleration.x = 0
+                    #     print("left")
+
+
+                   
+
 
     def animate(self, dt: float):
         """
@@ -122,13 +206,16 @@ class Player(pg.sprite.Sprite):
                 self.acceleration.y = -5
             if event.key == pg.K_RIGHT:
                 self.change_animation('walk')
-                self.acceleration.x = 0.1
+                self.acceleration.x = 0.02
             if event.key == pg.K_LEFT:
                 self.change_animation('walk')
-                self.acceleration.x = -0.1
+                self.acceleration.x = -0.02
         if event.type == pg.KEYUP:
             if event.key in {pg.K_RIGHT, pg.K_LEFT}:
                 self.acceleration.x = 0
+        # if event.type == pg.KEYUP:
+        #     if event.key in {pg.K_DOWN, pg.K_SPACE}:
+        #         self.acceleration.y = 0
 
     def draw(self, screen: pg.Surface):
         if self.velocity.x < 0:

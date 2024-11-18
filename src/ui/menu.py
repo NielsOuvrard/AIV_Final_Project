@@ -51,7 +51,7 @@ class GameMenu(State):
 
     def update(self) -> None:
         self.player.animate(0.1)
-        self.player.move_and_slide()
+        self.player.move_and_slide(self.level_handler.current_level)
 
     def draw(self, screen: pg.Surface) -> None:
         screen.fill(COLOR_BLACK)
