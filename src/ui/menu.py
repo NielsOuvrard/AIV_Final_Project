@@ -8,7 +8,7 @@ import pygame as pg
 from src.config import SCREEN_WIDTH, FONT_NAME, FONT_SIZE, COLOR_BLACK, COLOR_WHITE, COLOR_RED
 from src.game_states import MainState, State
 from src.entities.player import Player
-
+from src.world.level import LevelHandler
 
 class Button: # pylint: disable=too-many-arguments, too-many-positional-arguments
     """
@@ -47,6 +47,7 @@ class GameMenu(State):
         super().__init__()
         self.next_state: MainState | None = None
         self.player: Player = Player()
+        self.level_handler = LevelHandler()
 
     def update(self) -> None:
         self.player.animate(0.1)
@@ -55,6 +56,7 @@ class GameMenu(State):
     def draw(self, screen: pg.Surface) -> None:
         screen.fill(COLOR_BLACK)
         self.player.draw(screen)
+        self.level_handler.draw(screen)
 
     def handle_event(self, event: pg.event.Event) -> None:
         if event.type == pg.QUIT:
