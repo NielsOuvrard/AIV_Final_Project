@@ -1,2 +1,4 @@
 pygame-ce==2.5.2 # Comunity Edition, works better on Apple Silicon
 toml==0.10.2
+pylint==3.3.1
+mypy==1.13.0
