@@ -4,31 +4,77 @@
  # @ Description:
  '''
 
+from enum import Enum
 import pygame as pg
 import toml
-from src.config import SCALING_FACTOR, SCREEN_HEIGHT, GRAVITY
+from src.config import SCALING_FACTOR, GRAVITY, TILE_SIZE
 from src.world.level import Level
+
+class CornerSide(Enum):
+    TOP_LEFT = 0
+    TOP_RIGHT = 1
+    BOTTOM_LEFT = 2
+    BOTTOM_RIGHT = 3
+
+class ObjectCollision:
+    """
+    ObjectCollision class to represent an object that can collide with other objects
+    It can be a tile, a player, an enemy, etc...
+    """
+    def __init__(self, x: float, y: float, size_x: int, size_y: int):
+        """
+        The x and y coordinates are the top-left corner of the object
+        """
+        self.x = x
+        self.y = y
+        self.size_x = size_x
+        self.size_y = size_y
+
+    def check_collision(self, point: pg.Vector2) -> bool:
+        return (self.x <= point.x <= (self.x + self.size_x) and
+                self.y <= point.y <= (self.y + self.size_y))
+
+    def get_corners(self) -> list[pg.Vector2]:
+        """
+        Get the corners of the object
+        In the order of: top-left, top-right, bottom-left, bottom-right
+        """
+        return [
+            pg.Vector2(self.x, self.y),
+            pg.Vector2(self.x + self.size_x, self.y),
+            pg.Vector2(self.x, self.y + self.size_y),
+            pg.Vector2(self.x + self.size_x, self.y + self.size_y)
+        ]
+
+    def is_colliding(self, other: 'ObjectCollision') -> set[CornerSide]:
+        """
+        Check if the object is colliding with another object
+        """
+        colliding = set()
+
+        # for each corner of the player, check if it collides with the object
+        for i, corner in enumerate(self.get_corners()):
+            if other.check_collision(corner):
+                colliding.add(CornerSide(i))
+
+        return colliding
 
 class Player(pg.sprite.Sprite):
     """
     Player class to represent the player character
     """
-    def __init__(self):
+    def __init__(self, position: tuple[int, int]) -> None:
         super().__init__()
 
         self.sprite_sheet = pg.image.load("assets/mario_bros.png").convert_alpha()
-        self.animations = {}
+        self.animations: dict = {}
         self.current_animation = 'idle'
         self.animation_speed = 0.1
-        self.animation_time = 0
+        self.animation_time = 0.0
         self.frame_index = 0
         self.load_animations()
 
-        # debug
-        self.ground_y = SCREEN_HEIGHT - (SCREEN_HEIGHT // 11)
-        self.in_ground = False
-
-        self.position = pg.Vector2(100, self.ground_y)
+        self.position = pg.Vector2(*position)
         self.velocity = pg.Vector2(0, 0)
         self.acceleration = pg.Vector2(0, 0)
 
@@ -61,6 +107,56 @@ class Player(pg.sprite.Sprite):
                 frames.append(frame)
             self.animations[animation_name] = frames
 
+    def snap_position(self, sides: set[CornerSide], objects: list[ObjectCollision]) -> None:
+        """
+        Snap the player position to the object it is colliding with
+        """
+        # pylint: disable=fixme
+        # todo see how to choose the right object
+
+        if {CornerSide.BOTTOM_LEFT, CornerSide.BOTTOM_RIGHT}.issubset(sides):
+            self.position.y = objects[0].y - self.image.get_height() * SCALING_FACTOR
+            self.velocity.y = 0
+            self.change_animation('idle' if self.velocity.x == 0 else 'walk')
+        elif {CornerSide.TOP_LEFT, CornerSide.BOTTOM_LEFT}.issubset(sides):
+            self.position.x = objects[0].x + objects[0].size_x
+            self.velocity.x = 0
+        elif {CornerSide.TOP_RIGHT, CornerSide.BOTTOM_RIGHT}.issubset(sides):
+            self.position.x = objects[0].x - self.image.get_width() * SCALING_FACTOR
+            self.velocity.x = 0
+        elif {CornerSide.TOP_LEFT, CornerSide.TOP_RIGHT}.issubset(sides):
+            self.position.y = objects[0].y + objects[0].size_y
+            self.velocity.y = GRAVITY
+
+
+    def handle_collision(self, level: Level):
+        """
+        Handle collision with the level
+        """
+        player = ObjectCollision(
+            self.position.x,
+            self.position.y,
+            self.image.get_width() * SCALING_FACTOR,
+            self.image.get_height() * SCALING_FACTOR
+        ) # 100.0, 546.0 with size 32, 32
+
+        sides_colliding: set[CornerSide] = set()
+        objects_colliding = []
+
+        for tile in level.tiles:
+            object_to_collide = ObjectCollision(
+                tile.rect.x,
+                tile.rect.y,
+                TILE_SIZE,
+                TILE_SIZE
+            )
+            local_colliding = player.is_colliding(object_to_collide)
+            if local_colliding != set():
+                sides_colliding.update(local_colliding)
+                objects_colliding.append(object_to_collide)
+                tile.color = (0, 0, 255)
+        if sides_colliding != set():
+            self.snap_position(sides_colliding, objects_colliding)
 
     def move_and_slide(self, level: Level):
         """
@@ -79,98 +175,12 @@ class Player(pg.sprite.Sprite):
         self.acceleration.y = 0
         self.velocity.y += GRAVITY
 
-        # Check for ground collision
-        if self.position.y > self.ground_y:
-            self.position.y = self.ground_y
-            self.velocity.y = 0
-            self.change_animation('idle' if self.velocity.x == 0 else 'walk')
-
         # Check for idle state
         if self.velocity.x < 0.01 and self.velocity.x > -0.01:
             self.change_animation('idle')
             self.velocity.x = 0
 
-        x1y1 = self.position
-        x2y1 = pg.Vector2(self.position.x + self.image.get_width()*SCALING_FACTOR ,self.position.y)
-        x1y2 = pg.Vector2(self.position.x, self.position.y + self.image.get_height()*SCALING_FACTOR)
-        x2y2 = pg.Vector2(self.position.x + self.image.get_width()*SCALING_FACTOR, self.position.y + self.image.get_height()*SCALING_FACTOR)
-
-        tile_size = level.tile_size
-
-        up1, up2, ri1, ri2, dw1, dw2, le1, le2 = [False]*8
-        x_snap = 0
-        y_snap = 0
-        for i, row in enumerate(level.layout):
-            for x, tile in enumerate(row):
-                if tile == '#':
-                    if (x1y1.x > x*tile_size and x1y1.x < (x*tile_size+tile_size) and x1y1.y > i*tile_size and x1y1.y < (i*tile_size+tile_size)):
-                        up1 = True
-                        le1 = True
-                        x_snap = x
-                        y_snap = i
-                    if (x2y1.x > x*tile_size and x2y1.x < (x*tile_size+tile_size) and x2y1.y > i*tile_size and x2y1.y < (i*tile_size+tile_size)):
-                        up2 = True
-                        ri1 = True
-                        x_snap = x
-                        y_snap = i
-                    if (x1y2.x > x*tile_size and x1y2.x < (x*tile_size+tile_size) and x1y2.y > i*tile_size and x1y2.y < (i*tile_size+tile_size)):
-                        dw1 = True
-                        le2 = True
-                        x_snap = x
-                        y_snap = i
-                    if (x2y2.x > x*tile_size and x2y2.x < (x*tile_size+tile_size) and x2y2.y > i*tile_size and x2y2.y < (i*tile_size+tile_size)):
-                        dw2 = True
-                        ri2 = True
-                        x_snap = x
-                        y_snap = i
-        if ri1 and ri2:
-            self.position = pg.Vector2(x_snap*tile_size-self.image.get_width()*SCALING_FACTOR, self.position.y)
-            self.acceleration.x = 0
-            print("right")
-        elif le1 and le2:
-            self.position = pg.Vector2(x_snap*tile_size, self.position.y)
-            self.acceleration.x = 0
-            print("left")
-        elif up1 or up2:
-            self.position = pg.Vector2(self.position.x , y_snap*tile_size+tile_size)
-            self.acceleration.y = 0
-            print("up")
-        elif (dw1 or dw2): 
-            self.position = pg.Vector2(self.position.x , y_snap*tile_size-self.image.get_height()*SCALING_FACTOR)
-            self.acceleration.y = 0
-            self.in_ground = True
-            self.velocity.y = 0
-            # print("down")
-        
-
-
-
-                    # #collision with ceiling
-                    # if (x1y1.x > x*tile_size and x1y1.x < (x*tile_size+tile_size) and x1y1.y > i*tile_size and x1y1.y < (i*tile_size+tile_size)) and (x2y1.x > x*tile_size and x2y1.x < (x*tile_size+tile_size) and x2y1.y > i*tile_size and x2y1.y < (i*tile_size+tile_size)):
-                    #     self.position = pg.Vector2(self.position.x , i*tile_size+tile_size)
-                    #     self.acceleration.y = 0
-                    #     print("up")
-                    # #collision with right wall
-                    # if (x2y1.x > x*tile_size and x2y1.x < (x*tile_size+tile_size) and x2y1.y > i*tile_size and x2y1.y < (i*tile_size+tile_size)) and (x2y2.x > x*tile_size and x2y2.x < (x*tile_size+tile_size) and x2y2.y > i*tile_size and x2y2.y < (i*tile_size+tile_size)):
-                    #     self.position = pg.Vector2(x*tile_size-self.image.get_width()*SCALING_FACTOR, self.position.y)
-                    #     self.acceleration.x = 0
-                    #     print("right")
-                    # #collision with floor
-                    # if (x1y2.x > x*tile_size and x1y2.x < (x*tile_size+tile_size) and x1y2.y > i*tile_size and x1y2.y < (i*tile_size+tile_size)) and (x2y2.x > x*tile_size and x2y2.x < (x*tile_size+tile_size) and x2y2.y > i*tile_size and x2y2.y < (i*tile_size+tile_size)):
-                    #     self.position = pg.Vector2(self.position.x , i*tile_size-self.image.get_height()*SCALING_FACTOR)
-                    #     self.acceleration.y = 0
-                    #     self.in_ground = True
-                    #     self.velocity.y = 0
-                    #     print("down")
-                    # #collision with left wall
-                    # if (x1y1.x > x*tile_size and x1y1.x < (x*tile_size+tile_size) and x1y1.y > i*tile_size and x1y1.y < (i*tile_size+tile_size)) and (x1y2.x > x*tile_size and x1y2.x < (x*tile_size+tile_size) and x1y2.y > i*tile_size and x1y2.y < (i*tile_size+tile_size)):
-                    #     self.position = pg.Vector2(x*tile_size+tile_size, self.position.y)
-                    #     self.acceleration.x = 0
-                    #     print("left")
-
-
-                   
-
+        self.handle_collision(level)
 
     def animate(self, dt: float):
         """
@@ -206,10 +216,10 @@ class Player(pg.sprite.Sprite):
                 self.acceleration.y = -5
             if event.key == pg.K_RIGHT:
                 self.change_animation('walk')
-                self.acceleration.x = 0.02
+                self.acceleration.x = 0.04
             if event.key == pg.K_LEFT:
                 self.change_animation('walk')
-                self.acceleration.x = -0.02
+                self.acceleration.x = -0.04
         if event.type == pg.KEYUP:
             if event.key in {pg.K_RIGHT, pg.K_LEFT}:
                 self.acceleration.x = 0

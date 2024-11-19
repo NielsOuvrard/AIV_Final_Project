@@ -7,20 +7,32 @@
 from typing import Any
 import toml
 import pygame as pg
+from src.config import TILE_SIZE
 
-TILE_SIZE = 64
 TOML_FILE = "assets/level.toml"
+
+
+class Tile:
+    """
+    Tile class to represent a tile in the level
+    """
+    def __init__(self, x: int, y: int, size: int, color: tuple[int, int, int]) -> None:
+        self.rect: pg.Rect = pg.Rect(x, y, size, size)
+        self.color: tuple[int, int, int] = color
+
+    def draw(self, screen: pg.Surface) -> None:
+        pg.draw.rect(screen, self.color, self.rect)
 
 class Level:
     """
     Level class to represent the level
     """
     def __init__(self, name: str,
-            layout: list[str],
+            tiles: list[Tile],
             start_position: tuple[int, int],
             enemies: list[tuple[int, int]]) -> None:
         self.name: str = name
-        self.layout: list[str] = layout
+        self.tiles: list[Tile] = tiles
         self.start_position: tuple[int, int] = start_position
         self.enemies: list[tuple[int, int]] = enemies
         self.tile_size = TILE_SIZE
@@ -48,22 +60,24 @@ class LevelHandler:
             start_position: tuple[int, int] = (0, 0)
             enemies: list[tuple[int, int]] = []
 
-            layout_2d: list[str] = []
-            x = 0
+            tiles: list[Tile] = []
+            y = 0
             width = -1
             for i, tile in enumerate(layout):
                 if tile == '\n':
                     if width == -1:
                         width = i
-                    layout_2d.append(str(layout[x * width + x:i]))
-                    x += 1
+                    y += 1
 
                 if tile == 'P':
-                    start_position = (x, i)
+                    start_position = ((i - y * width - y) * TILE_SIZE, y * TILE_SIZE)
+                    print(f'Start position: {start_position} at level {name}, [{i - y * width - y}, {y}] {width}')
                 elif tile == 'E':
-                    enemies.append((x, i))
+                    enemies.append(((i - y * width - y), y))
+                elif tile == '#':
+                    tiles.append(Tile((i - y * width - y) * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, (255, 0, 0)))
 
-            self.levels.append(Level(name, layout_2d, start_position, enemies))
+            self.levels.append(Level(name, tiles, start_position, enemies))
 
     def change_level(self, level_name: str) -> None:
         for level in self.levels:
@@ -72,9 +86,7 @@ class LevelHandler:
                 break
 
     def draw(self, screen: pg.Surface) -> None:
-        for i, row in enumerate(self.current_level.layout):
-            for x, tile in enumerate(row):
-                if tile == '#':
-                    pg.draw.rect(screen, (255, 0, 0), (x * TILE_SIZE, i * TILE_SIZE, TILE_SIZE, TILE_SIZE))
-                elif tile == 'E':
-                    pg.draw.rect(screen, (0, 0, 255), (x * TILE_SIZE, i * TILE_SIZE, TILE_SIZE, TILE_SIZE))
+        for tile in self.current_level.tiles:
+            tile.draw(screen)
+        for enemy in self.current_level.enemies:
+            pg.draw.rect(screen, (0, 255, 0), pg.Rect(enemy[0] * TILE_SIZE, enemy[1] * TILE_SIZE, TILE_SIZE, TILE_SIZE))

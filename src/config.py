@@ -23,3 +23,4 @@ COLOR_RED = (255, 0, 0)
 # Game settings
 SCALING_FACTOR = 2
 GRAVITY = 0.05
+TILE_SIZE = 64
