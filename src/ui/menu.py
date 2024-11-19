@@ -43,15 +43,15 @@ class GameMenu(State):
     """
     Game menu class to represent the game menu
     """
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.next_state: MainState | None = None
-        self.player: Player = Player()
         self.level_handler = LevelHandler()
+        self.player: Player = Player(self.level_handler.current_level.start_position)
 
     def update(self) -> None:
         self.player.animate(0.1)
-        self.player.move_and_slide()
+        self.player.move_and_slide(self.level_handler.current_level)
 
     def draw(self, screen: pg.Surface) -> None:
         screen.fill(COLOR_BLACK)
@@ -67,7 +67,7 @@ class MainMenu(State):
     """
     Main menu class to represent the main menu of the game
     """
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.title: str = "Main Menu"
         self.title_font: pg.font.Font = pg.font.Font(FONT_NAME, int(FONT_SIZE * 1.5))
