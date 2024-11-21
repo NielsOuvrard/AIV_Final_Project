@@ -14,6 +14,7 @@ WINDOW_TITLE = 'Mario Bros'
 FONT_NAME = None  # Default font
 FONT_SIZE = 74
 FONT_COLOR = (255, 255, 255)
+FONT_BUTTON_SIZE = 32
 
 # Colors
 COLOR_BLACK = (0, 0, 0)
