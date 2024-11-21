@@ -120,7 +120,7 @@ class Credits(State):
         self.title_text: pg.Surface = self.title_font.render(self.title, True, COLOR_WHITE)
         self.title_text_rect: pg.Rect = self.title_text.get_rect(center=(SCREEN_WIDTH // 2, 100))
 
-        self.credits: str = "Authors: \nNiels Ouvrard \nDiego Jiménez Ontiveros \nSantiago Arreola Munguia \n\nClass: \nAI in videogames \n\nTeacher: \nAlfredo Emmanuel Garcia Falcon \n\nUniversidad Panamericana, Guadalajara, Jal."
+        self.credits: str = "Authors: \nNiels Ouvrard \nDiego Jiménez Ontiveros \nSantiago Arreola Munguia \n\nClass: \nAI in videogames"
         self.credits_font: pg.font.Font = pg.font.Font(FONT_NAME, int(FONT_BUTTON_SIZE * 0.8))
         self.credits_text: pg.Surface = self.credits_font.render(self.credits, True, COLOR_WHITE)
         self.credits_text_rect: pg.Rect = self.credits_text.get_rect(center=(SCREEN_WIDTH // 2, 250))
