@@ -5,7 +5,7 @@
  '''
 import pygame as pg
 
-from src.config import SCREEN_WIDTH, FONT_NAME, FONT_SIZE, COLOR_BLACK, COLOR_WHITE, COLOR_RED
+from src.config import SCREEN_WIDTH, FONT_NAME, FONT_SIZE, FONT_BUTTON_SIZE, COLOR_BLACK, COLOR_WHITE, COLOR_RED
 from src.game_states import MainState, State
 from src.entities.player import Player
 from src.world.level import LevelHandler
@@ -107,4 +107,42 @@ class MainMenu(State):
             elif self.quit_button.rect.collidepoint(event.pos):
                 self.next_state = MainState.QUIT
         self.play_button.handle_event(event)
+        self.quit_button.handle_event(event)
+
+class Credits(State):
+    """
+    Credits class to represent the credits screen of the game
+    """
+    def __init__(self) -> None:
+        super().__init__()
+        self.title: str = "Credits"
+        self.title_font: pg.font.Font = pg.font.Font(FONT_NAME, int(FONT_SIZE * 1.5))
+        self.title_text: pg.Surface = self.title_font.render(self.title, True, COLOR_WHITE)
+        self.title_text_rect: pg.Rect = self.title_text.get_rect(center=(SCREEN_WIDTH // 2, 100))
+
+        self.credits: str = "Authors: \nNiels Ouvrard \nDiego Jiménez Ontiveros \nSantiago Arreola Munguia \n\nClass: \nAI in videogames \n\nTeacher: \nAlfredo Emmanuel Garcia Falcon \n\nUniversidad Panamericana, Guadalajara, Jal."
+        self.credits_font: pg.font.Font = pg.font.Font(FONT_NAME, int(FONT_BUTTON_SIZE * 0.8))
+        self.credits_text: pg.Surface = self.credits_font.render(self.credits, True, COLOR_WHITE)
+        self.credits_text_rect: pg.Rect = self.credits_text.get_rect(center=(SCREEN_WIDTH // 2, 250))
+
+        self.quit_button: Button = Button(
+            (40, 40),
+            "Quit",
+            pg.font.Font(FONT_NAME, FONT_BUTTON_SIZE),
+            COLOR_WHITE,
+            COLOR_RED
+        )
+
+    def update(self):
+        pass
+
+    def draw(self, screen):
+        screen.fill(COLOR_BLACK)
+        screen.blit(self.title_text, self.title_text_rect)
+        screen.blit(self.credits_text, self.credits_text_rect)
+        self.quit_button.draw(screen)
+
+    def handle_event(self, event: pg.event.Event) -> None:
+        if event.type == pg.QUIT:
+            self.next_state = MainState.MAIN_MENU
         self.quit_button.handle_event(event)
