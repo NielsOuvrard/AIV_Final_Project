@@ -29,9 +29,10 @@ if __name__ == '__main__':
             actualState = GameMenu()
         elif actualState.next_state == MainState.MAIN_MENU:
             actualState = MainMenu()
+        elif actualState.next_state == MainState.CREDITS:
+            actualState = Credits() 
         elif actualState.next_state == MainState.QUIT:
-           running = False # pylint: disable=invalid-name
-            # actualState = Credits()
+            running = False # pylint: disable=invalid-name
 
         pygame.display.flip()
 

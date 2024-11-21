@@ -81,8 +81,15 @@ class MainMenu(State):
             COLOR_WHITE,
             COLOR_RED
         )
-        self.quit_button: Button = Button(
+        self.credits_button: Button = Button(
             (SCREEN_WIDTH // 2, 300),
+            "Credits",
+            pg.font.Font(FONT_NAME, FONT_SIZE),
+            COLOR_WHITE,
+            COLOR_RED
+        )
+        self.quit_button: Button = Button(
+            (SCREEN_WIDTH // 2, 400),
             "Quit",
             pg.font.Font(FONT_NAME, FONT_SIZE),
             COLOR_WHITE,
@@ -96,6 +103,7 @@ class MainMenu(State):
         screen.fill(COLOR_BLACK)
         screen.blit(self.title_text, self.title_text_rect)
         self.play_button.draw(screen)
+        self.credits_button.draw(screen)
         self.quit_button.draw(screen)
 
     def handle_event(self, event: pg.event.Event) -> None:
@@ -106,8 +114,11 @@ class MainMenu(State):
                 self.next_state = MainState.GAME
             elif self.quit_button.rect.collidepoint(event.pos):
                 self.next_state = MainState.QUIT
+            elif self.credits_button.rect.collidepoint(event.pos):
+                self.next_state = MainState.CREDITS
         self.play_button.handle_event(event)
         self.quit_button.handle_event(event)
+        self.credits_button.handle_event(event)
 
 class Credits(State):
     """
@@ -121,28 +132,31 @@ class Credits(State):
         self.title_text_rect: pg.Rect = self.title_text.get_rect(center=(SCREEN_WIDTH // 2, 100))
 
         self.credits: str = "Authors: \nNiels Ouvrard \nDiego Jiménez \nSantiago Arreola \n\nClass: \nAI in videogames"
-        self.credits_font: pg.font.Font = pg.font.Font(FONT_NAME, int(FONT_BUTTON_SIZE * 0.8))
+        self.credits_font: pg.font.Font = pg.font.Font(FONT_NAME, int(FONT_BUTTON_SIZE))
         self.credits_text: pg.Surface = self.credits_font.render(self.credits, True, COLOR_WHITE)
         self.credits_text_rect: pg.Rect = self.credits_text.get_rect(center=(SCREEN_WIDTH // 2, 250))
 
-        self.quit_button: Button = Button(
+        self.exit_button: Button = Button(
             (40, 40),
-            "Quit",
+            "Exit",
             pg.font.Font(FONT_NAME, FONT_BUTTON_SIZE),
             COLOR_WHITE,
             COLOR_RED
         )
 
-    def update(self):
+    def update(self) -> None:
         pass
 
-    def draw(self, screen):
+    def draw(self, screen: pg.Surface) -> None:
         screen.fill(COLOR_BLACK)
         screen.blit(self.title_text, self.title_text_rect)
         screen.blit(self.credits_text, self.credits_text_rect)
-        self.quit_button.draw(screen)
+        self.exit_button.draw(screen)
 
     def handle_event(self, event: pg.event.Event) -> None:
-        if event.type == pg.QUIT:
+        if event.type == MainState.QUIT:
             self.next_state = MainState.MAIN_MENU
-        self.quit_button.handle_event(event)
+        if event.type == pg.MOUSEBUTTONDOWN:
+            if self.exit_button.rect.collidepoint(event.pos):
+                self.next_state = MainState.MAIN_MENU
+        self.exit_button.handle_event(event)
