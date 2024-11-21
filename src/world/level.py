@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 import toml
 import pygame as pg
 
+
 from src.config import TILE_SIZE
 from src.core import Graph, Node, dijkstra
 
@@ -86,57 +87,6 @@ class LevelHandler:
             x = frame_data['y_position']
             y = frame_data['x_position']
             self.frames[name] = (x, y)
-
-    def get_neighbour(self, layout: list[str], i: int, y: int, width: int) -> dict[str, float]:
-        """
-        Get the neighbours of a node in the graph
-        """
-        # pylint: disable=R0914 # Too many local variables, disable for clarity
-        def get_local_x(x: int) -> int:
-            return x - y * width - y
-
-        neighbours: dict[str, float] = {}
-
-        to_left = i - 1
-        to_right = i + 1
-        to_up = i - width - 1
-        to_down = i + width + 1
-
-        cond_left = i > 0
-        cond_right = i < len(layout)
-        cond_up = y > 0
-        cond_down = i + width < len(layout)
-
-        def ok(char: str) -> bool:
-            return char not in ['\n', '#']
-
-        if cond_left and ok(layout[to_left]):
-            neighbours[f'{get_local_x(i - 1)}-{y}'] = 1.0
-        if cond_right and ok(layout[to_right]):
-            neighbours[f'{get_local_x(i + 1)}-{y}'] = 1.0
-        if y > 0 and ok(layout[to_up]):
-            neighbours[f'{get_local_x(i)}-{y - 1}'] = 1.0
-        if cond_down and ok(layout[to_down]):
-            neighbours[f'{get_local_x(i)}-{y + 1}'] = 1.0
-
-        # Add diagonal neighbours
-        if cond_left and cond_up and\
-        ok(layout[to_up]) and ok(layout[to_left]) and ok(layout[to_up - 1]):
-            neighbours[f'{get_local_x(i - 1)}-{y - 1}'] = sqrt(2)
-
-        if cond_right and cond_up and\
-        ok(layout[to_up]) and ok(layout[to_right]) and ok(layout[to_up + 1]):
-            neighbours[f'{get_local_x(i + 1)}-{y - 1}'] = sqrt(2)
-
-        if cond_down and cond_left and\
-        ok(layout[to_down]) and ok(layout[to_left]) and ok(layout[to_down - 1]):
-            neighbours[f'{get_local_x(i - 1)}-{y + 1}'] = sqrt(2)
-
-        if cond_down and cond_right and\
-        ok(layout[to_down]) and ok(layout[to_right]) and ok(layout[to_down + 1]):
-            neighbours[f'{get_local_x(i + 1)}-{y + 1}'] = sqrt(2)
-
-        return neighbours
 
     def load_levels(self, toml_file: str) -> None:
         """
