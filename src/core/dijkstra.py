@@ -26,7 +26,7 @@ class Graph:
     """
     Graph class to represent a graph, with nodes and edges
     """
-    def __init__(self, edges: dict[str, dict[str, int]]):
+    def __init__(self, edges: dict[str, dict[str, float]]):
         self.edges = edges
         self.nodes = {node: Node(node) for node in edges.keys()}
 
