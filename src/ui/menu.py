@@ -5,7 +5,7 @@
  '''
 import pygame as pg
 
-from src.config import SCREEN_WIDTH, FONT_NAME, FONT_SIZE, COLOR_BLACK, COLOR_WHITE, COLOR_RED
+from src.config import SCREEN_WIDTH, FONT_NAME, FONT_SIZE, FONT_BUTTON_SIZE, COLOR_BLACK, COLOR_WHITE, COLOR_RED
 from src.game_states import MainState, State
 from src.entities.player import Player
 from src.world.level import LevelHandler
@@ -81,8 +81,15 @@ class MainMenu(State):
             COLOR_WHITE,
             COLOR_RED
         )
-        self.quit_button: Button = Button(
+        self.credits_button: Button = Button(
             (SCREEN_WIDTH // 2, 300),
+            "Credits",
+            pg.font.Font(FONT_NAME, FONT_SIZE),
+            COLOR_WHITE,
+            COLOR_RED
+        )
+        self.quit_button: Button = Button(
+            (SCREEN_WIDTH // 2, 400),
             "Quit",
             pg.font.Font(FONT_NAME, FONT_SIZE),
             COLOR_WHITE,
@@ -96,6 +103,7 @@ class MainMenu(State):
         screen.fill(COLOR_BLACK)
         screen.blit(self.title_text, self.title_text_rect)
         self.play_button.draw(screen)
+        self.credits_button.draw(screen)
         self.quit_button.draw(screen)
 
     def handle_event(self, event: pg.event.Event) -> None:
@@ -103,8 +111,110 @@ class MainMenu(State):
             self.next_state = MainState.QUIT
         if event.type == pg.MOUSEBUTTONDOWN:
             if self.play_button.rect.collidepoint(event.pos):
-                self.next_state = MainState.GAME
+                self.next_state = MainState.INSTRUCTIONS
             elif self.quit_button.rect.collidepoint(event.pos):
                 self.next_state = MainState.QUIT
+            elif self.credits_button.rect.collidepoint(event.pos):
+                self.next_state = MainState.CREDITS
         self.play_button.handle_event(event)
         self.quit_button.handle_event(event)
+        self.credits_button.handle_event(event)
+
+class Credits(State):
+    """
+    Credits class to represent the credits screen of the game
+    """
+    def __init__(self) -> None:
+        super().__init__()
+        self.title: str = "Credits"
+        self.title_font: pg.font.Font = pg.font.Font(FONT_NAME, int(FONT_SIZE * 1.5))
+        self.title_text: pg.Surface = self.title_font.render(self.title, True, COLOR_WHITE)
+        self.title_text_rect: pg.Rect = self.title_text.get_rect(center=(SCREEN_WIDTH // 2, 100))
+
+        self.credits: str = "Authors: \nNiels Ouvrard \nDiego Jiménez \nSantiago Arreola \n\nClass: \nAI in videogames"
+        self.credits_font: pg.font.Font = pg.font.Font(FONT_NAME, int(FONT_BUTTON_SIZE))
+        self.credits_text: pg.Surface = self.credits_font.render(self.credits, True, COLOR_WHITE)
+        self.credits_text_rect: pg.Rect = self.credits_text.get_rect(center=(SCREEN_WIDTH // 2, 250))
+
+        self.exit_button: Button = Button(
+            (40, 40),
+            "Exit",
+            pg.font.Font(FONT_NAME, FONT_BUTTON_SIZE),
+            COLOR_WHITE,
+            COLOR_RED
+        )
+
+    def update(self) -> None:
+        pass
+
+    def draw(self, screen: pg.Surface) -> None:
+        screen.fill(COLOR_BLACK)
+        screen.blit(self.title_text, self.title_text_rect)
+        screen.blit(self.credits_text, self.credits_text_rect)
+        self.exit_button.draw(screen)
+
+    def handle_event(self, event: pg.event.Event) -> None:
+        if event.type == MainState.QUIT:
+            self.next_state = MainState.MAIN_MENU
+        if event.type == pg.MOUSEBUTTONDOWN:
+            if self.exit_button.rect.collidepoint(event.pos):
+                self.next_state = MainState.MAIN_MENU
+        self.exit_button.handle_event(event)
+class Instructions(State):
+    """
+    Intructions class to represent the intructios screen of the game
+    """
+    def __init__(self) -> None:
+        super().__init__()
+        self.title: str = "Instructions"
+        self.title_font: pg.font.Font = pg.font.Font(FONT_NAME, int(FONT_SIZE * 1.5))
+        self.title_text: pg.Surface = self.title_font.render(self.title, True, COLOR_WHITE)
+        self.title_text_rect: pg.Rect = self.title_text.get_rect(center=(SCREEN_WIDTH // 2, 100))
+
+        self.instructions: str = "Help Mario find the shortest way out without getting captured!"
+        self.instructions_font: pg.font.Font = pg.font.Font(FONT_NAME, int(FONT_BUTTON_SIZE))
+        self.instructions_text: pg.Surface = self.instructions_font.render(self.instructions, True, COLOR_WHITE)
+        self.instructions_text_rect: pg.Rect = self.instructions_text.get_rect(center=(SCREEN_WIDTH // 2, 200))
+
+        self.controls: str = "Use the keyboard arrows to move & the space bar to JUMP!"
+        self.controls_font: pg.font.Font = pg.font.Font(FONT_NAME, int(FONT_BUTTON_SIZE))
+        self.controls_text: pg.Surface = self.controls_font.render(self.controls, True, COLOR_WHITE)
+        self.controls_text_rect: pg.Rect = self.controls_text.get_rect(center=(SCREEN_WIDTH // 2, 250))
+
+        self.start_button: Button = Button(
+            (SCREEN_WIDTH//2, 400),
+            "Start",
+            pg.font.Font(FONT_NAME, FONT_SIZE),
+            COLOR_WHITE,
+            COLOR_RED
+        )
+
+        self.back_button: Button = Button(
+            (40, 40),
+            "Back",
+            pg.font.Font(FONT_NAME, FONT_BUTTON_SIZE),
+            COLOR_WHITE,
+            COLOR_RED
+        )
+
+    def update(self) -> None:
+        pass
+
+    def draw(self, screen: pg.Surface) -> None:
+        screen.fill(COLOR_BLACK)
+        screen.blit(self.title_text, self.title_text_rect)
+        screen.blit(self.instructions_text, self.instructions_text_rect)
+        screen.blit(self.controls_text, self.controls_text_rect)
+        self.start_button.draw(screen)
+        self.back_button.draw(screen)
+
+    def handle_event(self, event: pg.event.Event) -> None:
+        if event.type == MainState.QUIT:
+            self.next_state = MainState.MAIN_MENU
+        if event.type == pg.MOUSEBUTTONDOWN:
+            if self.start_button.rect.collidepoint(event.pos):
+                self.next_state = MainState.GAME
+            if self.back_button.rect.collidepoint(event.pos):
+                self.next_state = MainState.MAIN_MENU
+        self.start_button.handle_event(event)
+        self.back_button.handle_event(event)
