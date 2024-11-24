@@ -13,7 +13,8 @@ class MainState(Enum):
     """
     MAIN_MENU = 0
     GAME = 1
-    QUIT = 2
+    CREDITS = 2
+    QUIT = 3
 
 class State:
     """
