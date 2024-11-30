@@ -113,20 +113,19 @@ class Player(pg.sprite.Sprite):
         """
         # pylint: disable=fixme
         # todo see how to choose the right object
-
-        if {CornerSide.BOTTOM_LEFT, CornerSide.BOTTOM_RIGHT}.issubset(sides):
+        if {CornerSide.TOP_LEFT, CornerSide.BOTTOM_LEFT}.issubset(sides):
+            self.position.x = objects[0].x + objects[0].size_x + 1
+            self.velocity.x = 0
+        elif {CornerSide.TOP_RIGHT, CornerSide.BOTTOM_RIGHT}.issubset(sides):
+            self.position.x = objects[0].x - self.image.get_width() * SCALING_FACTOR -1
+            self.velocity.x = 0
+        elif {CornerSide.TOP_LEFT}.issubset(sides) or {CornerSide.TOP_RIGHT}.issubset(sides):
+            self.position.y = objects[0].y + objects[0].size_y
+            self.velocity.y = GRAVITY
+        elif {CornerSide.BOTTOM_LEFT}.issubset(sides) or { CornerSide.BOTTOM_RIGHT}.issubset(sides):
             self.position.y = objects[0].y - self.image.get_height() * SCALING_FACTOR
             self.velocity.y = 0
             self.change_animation('idle' if self.velocity.x == 0 else 'walk')
-        elif {CornerSide.TOP_LEFT, CornerSide.BOTTOM_LEFT}.issubset(sides):
-            self.position.x = objects[0].x + objects[0].size_x
-            self.velocity.x = 0
-        elif {CornerSide.TOP_RIGHT, CornerSide.BOTTOM_RIGHT}.issubset(sides):
-            self.position.x = objects[0].x - self.image.get_width() * SCALING_FACTOR
-            self.velocity.x = 0
-        elif {CornerSide.TOP_LEFT, CornerSide.TOP_RIGHT}.issubset(sides):
-            self.position.y = objects[0].y + objects[0].size_y
-            self.velocity.y = GRAVITY
 
 
     def handle_collision(self, level: Level):
