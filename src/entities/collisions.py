@@ -74,10 +74,10 @@ def snap_position(
     # todo see how to choose the right object
 
     if {CornerSide.TOP_LEFT, CornerSide.BOTTOM_LEFT}.issubset(sides):
-        position.x = objects[0].x + objects[0].size_x
+        position.x = objects[0].x + objects[0].size_x +1
         velocity.x = 0
     elif {CornerSide.TOP_RIGHT, CornerSide.BOTTOM_RIGHT}.issubset(sides):
-        position.x = objects[0].x - image.get_width() * SCALING_FACTOR
+        position.x = objects[0].x - image.get_width() * SCALING_FACTOR -1
         velocity.x = 0
     elif CornerSide.TOP_LEFT in sides or CornerSide.TOP_RIGHT in sides:
         position.y = objects[0].y + objects[0].size_y
