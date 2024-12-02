@@ -72,7 +72,7 @@ class LevelHandler:
                     start_position = ((i - y * width - y) * TILE_SIZE, y * TILE_SIZE)
                     print(f'Start position: {start_position} at level {name}, [{i - y * width - y}, {y}] {width}')
                 elif tile == 'E':
-                    enemies.append(((i - y * width - y), y))
+                    enemies.append(((i - y * width - y) * TILE_SIZE, y * TILE_SIZE))
                 elif tile == '#':
                     tiles.append(Tile((i - y * width - y) * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, (255, 0, 0)))
 
@@ -87,5 +87,3 @@ class LevelHandler:
     def draw(self, screen: pg.Surface) -> None:
         for tile in self.current_level.tiles:
             tile.draw(screen)
-        for enemy in self.current_level.enemies:
-            pg.draw.rect(screen, (0, 255, 0), pg.Rect(enemy[0] * TILE_SIZE, enemy[1] * TILE_SIZE, TILE_SIZE, TILE_SIZE))
