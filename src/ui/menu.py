@@ -6,6 +6,7 @@
 import pygame as pg
 
 from src.config import SCREEN_WIDTH, FONT_NAME, FONT_SIZE, FONT_BUTTON_SIZE, COLOR_BLACK, COLOR_WHITE, COLOR_RED
+from src.entities.enemy import Enemy
 from src.game_states import MainState, State
 from src.entities.player import Player
 from src.world.level import LevelHandler
@@ -48,14 +49,20 @@ class GameMenu(State):
         self.next_state: MainState | None = None
         self.level_handler = LevelHandler()
         self.player: Player = Player(self.level_handler.current_level.start_position)
+        self.enemies: list[Enemy] = [Enemy(pos) for pos in self.level_handler.current_level.enemies]
 
     def update(self) -> None:
         self.player.animate(0.1)
         self.player.move_and_slide(self.level_handler.current_level)
+        for enemy in self.enemies:
+            enemy.animate(0.1)
+            enemy.move_and_slide(self.level_handler.current_level)
 
     def draw(self, screen: pg.Surface) -> None:
         screen.fill(COLOR_BLACK)
         self.player.draw(screen)
+        for enemy in self.enemies:
+            enemy.draw(screen)
         self.level_handler.draw(screen)
 
     def handle_event(self, event: pg.event.Event) -> None:
