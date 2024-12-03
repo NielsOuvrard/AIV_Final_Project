@@ -33,14 +33,15 @@ class Level:
     """
     Level class to represent the level
     """
-    name: str
-    tiles: list[Tile]
-    start_position: tuple[int, int]
-    enemies: list[tuple[int, int]]
-    exit_position: tuple[int, int]
-    graph: Graph
-    graph_result: dict[str, Node] = field(init=False)
-    to_print: list[tuple[tuple[int, int], tuple[int, int]]] = field(default_factory=list)
+    def __init__(self, name: str,
+            tiles: list[Tile],
+            start_position: tuple[int, int],
+            enemies: list[tuple[int, int]]) -> None:
+        self.name: str = name
+        self.tiles: list[Tile] = tiles
+        self.start_position: tuple[int, int] = start_position
+        self.enemies: list[tuple[int, int]] = enemies
+        self.tile_size = TILE_SIZE
 
     def __post_init__(self):
         x, y = self.start_position
