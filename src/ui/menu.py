@@ -5,7 +5,16 @@
  '''
 import pygame as pg
 
-from src.config import SCREEN_WIDTH, FONT_NAME, FONT_SIZE, FONT_BUTTON_SIZE, COLOR_BLACK, COLOR_WHITE, COLOR_RED
+from src.config import (
+    SCREEN_WIDTH,
+    FONT_NAME,
+    FONT_SIZE,
+    FONT_BUTTON_SIZE,
+    COLOR_BLACK,
+    COLOR_WHITE,
+    COLOR_RED,
+    TILE_SIZE
+)
 from src.entities.enemy import Enemy
 from src.game_states import MainState, State
 from src.entities.player import Player
@@ -48,7 +57,8 @@ class GameMenu(State):
         super().__init__()
         self.next_state: MainState | None = None
         self.level_handler = LevelHandler()
-        self.player: Player = Player(self.level_handler.current_level.start_position)
+        x, y = self.level_handler.current_level.start_position
+        self.player: Player = Player((x * TILE_SIZE, y * TILE_SIZE))
         self.enemies: list[Enemy] = [Enemy(pos) for pos in self.level_handler.current_level.enemies]
 
     def update(self) -> None:
