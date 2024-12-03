@@ -45,7 +45,7 @@ class Enemy(Entity):
         elif self.state == EnemyState.WALKING:
             self.update_walking(player)
         elif self.state == EnemyState.ATTACKING:
-            self.update_attacking(player)
+            self.update_attacking()
         elif self.state == EnemyState.DEAD:
             self.update_dead()
 
