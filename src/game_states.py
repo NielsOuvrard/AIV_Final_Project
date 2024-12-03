@@ -15,6 +15,7 @@ class MainState(Enum):
     GAME = 1
     CREDITS = 2
     QUIT = 3
+    INSTRUCTIONS = 4
 
 class State:
     """

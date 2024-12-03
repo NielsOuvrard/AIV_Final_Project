@@ -6,7 +6,7 @@
 
 import pygame
 from src.config import SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_TITLE
-from src.ui.menu import MainMenu, GameMenu, Credits
+from src.ui.menu import MainMenu, GameMenu, Credits, Instructions
 from src.game_states import MainState, State
 
 
@@ -31,6 +31,8 @@ if __name__ == '__main__':
             actualState = MainMenu()
         elif actualState.next_state == MainState.CREDITS:
             actualState = Credits()
+        elif actualState.next_state == MainState.INSTRUCTIONS:
+            actualState = Instructions()
         elif actualState.next_state == MainState.QUIT:
             running = False # pylint: disable=invalid-name
 
