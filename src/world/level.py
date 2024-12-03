@@ -37,15 +37,22 @@ class Level:
     enemies: list[tuple[int, int]]
     exit_position: tuple[int, int]
     graph: Graph
+    graph_result: dict[str, Node] = field(init=False)
     to_print: list[tuple[tuple[int, int], tuple[int, int]]] = field(default_factory=list)
 
     def __post_init__(self):
-        for edge, value in self.graph.edges.items():
-            x, y = map(int, edge.split('-'))
-            for tile_pos in value:
-                x2, y2 = map(int, tile_pos.split('-'))
-                if ((x, y), (x2, y2)) not in self.to_print and ((x2, y2), (x, y)) not in self.to_print:
-                    self.to_print.append(((x, y), (x2, y2)))
+        x, y = self.start_position
+        self.graph_result = dijkstra(self.graph, f'{x}-{y}')
+
+        ex, ey = self.exit_position
+        solution = self.graph_result[f'{ex}-{ey}'].path
+        solution.append(f'{ex}-{ey}')
+
+        last = self.start_position
+        for path in solution:
+            x, y = map(int, path.split('-'))
+            self.to_print.append((last, (x, y)))
+            last = (x, y)
 
 class LevelHandler:
     """
@@ -100,14 +107,13 @@ class LevelHandler:
                     y += 1
 
                 if tile == 'P':
-                    start_position = (get_local_x(i) * TILE_SIZE, y * TILE_SIZE)
-                    print(f'Start position: {start_position} at level {name}, [{get_local_x(i)}, {y}] {width}')
+                    start_position = (get_local_x(i), y)
                 elif tile == 'E':
                     enemies.append((get_local_x(i) * TILE_SIZE, y * TILE_SIZE))
                 elif tile == '#':
                     tiles.append(Tile(get_local_x(i) * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, (255, 0, 0)))
                 elif tile == 'S':
-                    local_exit_position = (get_local_x(i) * TILE_SIZE, y * TILE_SIZE)
+                    local_exit_position = (get_local_x(i), y)
 
                 if tile not in ['\n', '#']:
                     local_graph[f'{get_local_x(i)}-{y}'] = get_neighbour(layout, i, y)
@@ -123,7 +129,8 @@ class LevelHandler:
     def draw(self, screen: pg.Surface) -> None:
         for tile in self.current_level.tiles:
             tile.draw(screen)
-        pg.draw.rect(screen, (0, 255, 0), pg.Rect(self.current_level.exit_position, (TILE_SIZE, TILE_SIZE)))
+        ex, ey = self.current_level.exit_position
+        pg.draw.rect(screen, (0, 255, 0), pg.Rect((ex * TILE_SIZE, ey * TILE_SIZE), (TILE_SIZE, TILE_SIZE)))
         for elem in self.current_level.to_print:
             x, y = elem[0]
             x2, y2 = elem[1]
