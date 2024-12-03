@@ -4,10 +4,10 @@
  # @ Description: Enemy class to represent an enemy in the game
  '''
 
+import pygame as pg
+from enum import Enum
 from src.entities.entity import Entity
 from src.entities.player import Player
-from enum import Enum
-import pygame as pg
 
 class EnemyState(Enum):
     """ 
@@ -22,10 +22,10 @@ class Enemy(Entity):
     """
     Enemy class with state machine implementation.
     """
-    def __init__(self, position: tuple[int, int]) -> None:
+    def __init__(self, position: tuple[int, int], player: Player) -> None:
         super().__init__("assets/enemies.png", "assets/enemies.toml", position)
-        self.target: Player = None
-        self.state = EnemyState.IDLE  
+        self.target = player
+        self.state = EnemyState.IDLE
         self.health = 1
 
     def change_state(self, new_state: EnemyState):
@@ -57,7 +57,7 @@ class Enemy(Entity):
         Behavior for the IDLE state.
         """
         self.change_animation('idle')
-        if self.target_in_range(30): 
+        if self.target_in_range(30):
             self.change_state(EnemyState.WALKING)
 
     def update_walking(self, player: Player):
@@ -66,9 +66,9 @@ class Enemy(Entity):
         """
         self.change_animation('walking')
         direction = player.position - self.position
-        if direction.length() > 0:  
+        if direction.length() > 0:
             direction.normalize_ip()
-        self.velocity = direction * 2 
+        self.velocity = direction * 2
 
         if self.target_in_range(5):
             self.change_state(EnemyState.ATTACKING)
@@ -78,10 +78,10 @@ class Enemy(Entity):
         Behavior for the ATTACKING state.
         """
         self.change_animation('attacking')
-        self.velocity = pg.Vector2(0, 0)  
+        self.velocity = pg.Vector2(0, 0)
 
-        if self.target_in_range(5):
-            player.take_damage(1)
+        # if self.target_in_range(5):
+        #     player.take_damage(1)
 
         if not self.target_in_range(5):
             self.change_state(EnemyState.WALKING)
@@ -91,7 +91,7 @@ class Enemy(Entity):
         Behavior for the DEAD state.
         """
         self.current_animation = 'die'
-        self.kill
+        self.kill()
 
     def target_in_range(self, range_distance: float) -> bool:
         """
@@ -108,5 +108,3 @@ class Enemy(Entity):
         self.health -= amount
         if self.health <= 0:
             self.change_state(EnemyState.DEAD)
-
-    
