@@ -6,9 +6,10 @@
 
 from math import sqrt
 from typing import Any
+from dataclasses import dataclass, field
+
 import toml
 import pygame as pg
-from dataclasses import dataclass, field
 
 from src.config import TILE_SIZE
 from src.core import Graph, Node, dijkstra
@@ -64,67 +65,78 @@ class LevelHandler:
         self.load_levels(TOML_FILE)
         self.current_level: Level = self.levels[0]
 
+    def get_neighbour(self, layout: list[str], i: int, y: int, width: int) -> dict[str, float]:
+        """
+        Get the neighbours of a node in the graph
+        """
+        # pylint: disable=R0914 # Too many local variables, disable for clarity
+        def get_local_x(x: int) -> int:
+            return x - y * width - y
+
+        neighbours: dict[str, float] = {}
+
+        to_left = i - 1
+        to_right = i + 1
+        to_up = i - width - 1
+        to_down = i + width + 1
+
+        cond_left = i > 0
+        cond_right = i < len(layout)
+        cond_up = y > 0
+        cond_down = i + width < len(layout)
+
+        def ok(char: str) -> bool:
+            return char not in ['\n', '#']
+
+        if cond_left and ok(layout[to_left]):
+            neighbours[f'{get_local_x(i - 1)}-{y}'] = 1.0
+        if cond_right and ok(layout[to_right]):
+            neighbours[f'{get_local_x(i + 1)}-{y}'] = 1.0
+        if y > 0 and ok(layout[to_up]):
+            neighbours[f'{get_local_x(i)}-{y - 1}'] = 1.0
+        if cond_down and ok(layout[to_down]):
+            neighbours[f'{get_local_x(i)}-{y + 1}'] = 1.0
+
+        # Add diagonal neighbours
+        if cond_left and cond_up and\
+        ok(layout[to_up]) and ok(layout[to_left]) and ok(layout[to_up - 1]):
+            neighbours[f'{get_local_x(i - 1)}-{y - 1}'] = sqrt(2)
+
+        if cond_right and cond_up and\
+        ok(layout[to_up]) and ok(layout[to_right]) and ok(layout[to_up + 1]):
+            neighbours[f'{get_local_x(i + 1)}-{y - 1}'] = sqrt(2)
+
+        if cond_down and cond_left and\
+        ok(layout[to_down]) and ok(layout[to_left]) and ok(layout[to_down - 1]):
+            neighbours[f'{get_local_x(i - 1)}-{y + 1}'] = sqrt(2)
+
+        if cond_down and cond_right and\
+        ok(layout[to_down]) and ok(layout[to_right]) and ok(layout[to_down + 1]):
+            neighbours[f'{get_local_x(i + 1)}-{y + 1}'] = sqrt(2)
+
+        return neighbours
+
     def load_levels(self, toml_file: str) -> None:
         """
         Load levels from a toml file
         """
+        def get_local_x(x: int) -> int:
+            return x - y * width - y
+
         with open(toml_file, 'r', encoding='utf-8') as file:
             data: dict[str, Any] = toml.load(file)
 
         for level_data in data['level']:
-            name: str = level_data['name']
-            layout: list[str] = level_data['layout']
             start_position: tuple[int, int] = (0, 0)
             enemies: list[tuple[int, int]] = []
 
             tiles: list[Tile] = []
             local_graph: dict[str, dict[str, float]] = {}
             local_exit_position = (0, 0)
+
             y = 0
             width = -1
-
-            def get_local_x(x: int) -> int:
-                return x - y * width - y
-
-            def get_neighbour(layout: list[str], i: int, y: int) -> dict[str, float]:
-                neighbours: dict[str, float] = {}
-
-                to_left = i - 1
-                to_right = i + 1
-                to_up = i - width - 1
-                to_down = i + width + 1
-
-                cond_left = i > 0
-                cond_right = i < len(layout)
-                cond_up = y > 0
-                cond_down = i + width < len(layout)
-
-                def ok(char: str) -> bool:
-                    return char not in ['\n', '#']
-
-                if cond_left and ok(layout[to_left]):
-                    neighbours[f'{get_local_x(i - 1)}-{y}'] = 1.0
-                if cond_right and ok(layout[to_right]):
-                    neighbours[f'{get_local_x(i + 1)}-{y}'] = 1.0
-                if y > 0 and ok(layout[to_up]):
-                    neighbours[f'{get_local_x(i)}-{y - 1}'] = 1.0
-                if cond_down and ok(layout[to_down]):
-                    neighbours[f'{get_local_x(i)}-{y + 1}'] = 1.0
-
-                # Add diagonal neighbours
-                if cond_left and cond_up and ok(layout[to_up]) and ok(layout[to_left]) and ok(layout[to_up - 1]):
-                    neighbours[f'{get_local_x(i - 1)}-{y - 1}'] = sqrt(2)
-                if cond_right and cond_up and ok(layout[to_up]) and ok(layout[to_right]) and ok(layout[to_up + 1]):
-                    neighbours[f'{get_local_x(i + 1)}-{y - 1}'] = sqrt(2)
-                if cond_down and cond_left and ok(layout[to_down]) and ok(layout[to_left]) and ok(layout[to_down - 1]):
-                    neighbours[f'{get_local_x(i - 1)}-{y + 1}'] = sqrt(2)
-                if cond_down and cond_right and ok(layout[to_down]) and ok(layout[to_right]) and ok(layout[to_down + 1]):
-                    neighbours[f'{get_local_x(i + 1)}-{y + 1}'] = sqrt(2)
-
-                return neighbours
-
-
-            for i, tile in enumerate(layout):
+            for i, tile in enumerate(level_data['layout']):
                 if tile == '\n':
                     if width == -1:
                         width = i
@@ -140,9 +152,16 @@ class LevelHandler:
                     local_exit_position = (get_local_x(i), y)
 
                 if tile not in ['\n', '#']:
-                    local_graph[f'{get_local_x(i)}-{y}'] = get_neighbour(layout, i, y)
+                    local_graph[f'{get_local_x(i)}-{y}'] = self.get_neighbour(level_data['layout'], i, y, width)
 
-            self.levels.append(Level(name, tiles, start_position, enemies, local_exit_position, Graph(local_graph)))
+            self.levels.append(
+                Level(level_data['name'],
+                tiles,
+                start_position,
+                enemies,
+                local_exit_position,
+                Graph(local_graph))
+            )
 
     def change_level(self, level_name: str) -> None:
         for level in self.levels:
