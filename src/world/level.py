@@ -4,6 +4,7 @@
  # @ Description:
  '''
 
+from math import sqrt
 from typing import Any
 import toml
 import pygame as pg
@@ -77,7 +78,7 @@ class LevelHandler:
             enemies: list[tuple[int, int]] = []
 
             tiles: list[Tile] = []
-            local_graph: dict[str, dict[str, int]] = {}
+            local_graph: dict[str, dict[str, float]] = {}
             local_exit_position = (0, 0)
             y = 0
             width = -1
@@ -85,18 +86,41 @@ class LevelHandler:
             def get_local_x(x: int) -> int:
                 return x - y * width - y
 
-            def get_neighbour(layout: list[str], i: int, y: int) -> dict[str, int]:
-                neighbours = {}
-                if i > 0 and layout[i - 1] not in ['\n', '#']:
-                    neighbours[f'{get_local_x(i - 1)}-{y}'] = 1
-                if i < len(layout) and layout[i + 1] not in ['\n', '#']:
-                    neighbours[f'{get_local_x(i + 1)}-{y}'] = 1
-                if y > 0 and layout[i - width - 1] not in ['\n', '#']:
-                    neighbours[f'{get_local_x(i)}-{y - 1}'] = 1
-                if i + width < len(layout) and layout[i + width + 1] not in ['\n', '#']:
-                    neighbours[f'{get_local_x(i)}-{y + 1}'] = 1
+            def get_neighbour(layout: list[str], i: int, y: int) -> dict[str, float]:
+                neighbours: dict[str, float] = {}
 
-                #todo add diagonal neighbours
+                to_left = i - 1
+                to_right = i + 1
+                to_up = i - width - 1
+                to_down = i + width + 1
+
+                cond_left = i > 0
+                cond_right = i < len(layout)
+                cond_up = y > 0
+                cond_down = i + width < len(layout)
+
+                def ok(char: str) -> bool:
+                    return char not in ['\n', '#']
+
+                if cond_left and ok(layout[to_left]):
+                    neighbours[f'{get_local_x(i - 1)}-{y}'] = 1.0
+                if cond_right and ok(layout[to_right]):
+                    neighbours[f'{get_local_x(i + 1)}-{y}'] = 1.0
+                if y > 0 and ok(layout[to_up]):
+                    neighbours[f'{get_local_x(i)}-{y - 1}'] = 1.0
+                if cond_down and ok(layout[to_down]):
+                    neighbours[f'{get_local_x(i)}-{y + 1}'] = 1.0
+
+                # Add diagonal neighbours
+                if cond_left and cond_up and ok(layout[to_up]) and ok(layout[to_left]) and ok(layout[to_up - 1]):
+                    neighbours[f'{get_local_x(i - 1)}-{y - 1}'] = sqrt(2)
+                if cond_right and cond_up and ok(layout[to_up]) and ok(layout[to_right]) and ok(layout[to_up + 1]):
+                    neighbours[f'{get_local_x(i + 1)}-{y - 1}'] = sqrt(2)
+                if cond_down and cond_left and ok(layout[to_down]) and ok(layout[to_left]) and ok(layout[to_down - 1]):
+                    neighbours[f'{get_local_x(i - 1)}-{y + 1}'] = sqrt(2)
+                if cond_down and cond_right and ok(layout[to_down]) and ok(layout[to_right]) and ok(layout[to_down + 1]):
+                    neighbours[f'{get_local_x(i + 1)}-{y + 1}'] = sqrt(2)
+
                 return neighbours
 
 
@@ -136,4 +160,4 @@ class LevelHandler:
             x2, y2 = elem[1]
             pg.draw.line(screen, (0, 0, 255),
                 (x * TILE_SIZE + TILE_SIZE // 2, y * TILE_SIZE + TILE_SIZE // 2),
-                (x2 * TILE_SIZE + TILE_SIZE // 2, y2 * TILE_SIZE + TILE_SIZE // 2), 2)
+                (x2 * TILE_SIZE + TILE_SIZE // 2, y2 * TILE_SIZE + TILE_SIZE // 2), 5)
