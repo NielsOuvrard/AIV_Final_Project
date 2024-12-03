@@ -64,7 +64,7 @@ class LevelHandler:
     def __init__(self) -> None:
         self.levels: list[Level] = []
         self.load_levels(TOML_FILE)
-        self.current_level: Level = self.levels[0]
+        self.current_level: Level = self.levels[1]
         self.world_image = pg.image.load("assets/world.png").convert_alpha()
         self.frames: dict[str, tuple[int, int]] = {}
         self.frame_dimensions: tuple[int, int]

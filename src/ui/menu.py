@@ -65,8 +65,7 @@ class GameMenu(State):
         self.player.animate(0.1)
         self.player.move_and_slide(self.level_handler.current_level)
         for enemy in self.enemies:
-            enemy.animate(0.1)
-            enemy.move_and_slide(self.level_handler.current_level)
+            enemy.update(0.1, self.level_handler.current_level, self.player)
 
     def draw(self, screen: pg.Surface) -> None:
         screen.fill(COLOR_BLACK)
