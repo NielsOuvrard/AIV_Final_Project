@@ -1,0 +1,17 @@
+#
+ # @ Author: Niels Ouvrard - Diego Jiménez Ontiveros - Santiago Arreola Munguia
+ # @ Create Time: 2024-12-03 00:04:01
+ # @ Description:
+ #
+
+[blocks]
+frame_width = 16
+frame_height = 16
+
+[blocks.brick]
+y_position = 0
+x_position = 0
+
+[blocks.exit]
+y_position = 48
+x_position = 96
