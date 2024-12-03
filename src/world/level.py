@@ -64,6 +64,28 @@ class LevelHandler:
         self.levels: list[Level] = []
         self.load_levels(TOML_FILE)
         self.current_level: Level = self.levels[0]
+        self.world_image = pg.image.load("assets/world.png").convert_alpha()
+        self.frames: dict[str, tuple[int, int]] = {}
+        self.frame_dimensions: tuple[int, int]
+        self.load_frames_world("assets/world.toml")
+
+
+    def load_frames_world(self, toml_path: str):
+        """
+        Load animations from a TOML file
+        """
+        config = toml.load(toml_path)
+
+        self.frame_dimensions = (config['blocks']['frame_width'], config['blocks']['frame_height'])
+
+        for name, frame_data in config['blocks'].items():
+            if name in {'frame_width', 'frame_height'}:
+                continue
+
+
+            x = frame_data['y_position']
+            y = frame_data['x_position']
+            self.frames[name] = (x, y)
 
     def get_neighbour(self, layout: list[str], i: int, y: int, width: int) -> dict[str, float]:
         """
@@ -170,10 +192,23 @@ class LevelHandler:
                 break
 
     def draw(self, screen: pg.Surface) -> None:
+        """
+        Draw the level
+        """
+        def draw_tile_here(x: int, y: int, name: str) -> None:
+            brick_image = self.world_image.subsurface((*self.frames[name], *self.frame_dimensions))
+            screen.blit(
+                pg.transform.scale(brick_image, (TILE_SIZE, TILE_SIZE)),
+                (x, y)
+            )
+
         for tile in self.current_level.tiles:
-            tile.draw(screen)
+            x, y = tile.rect.topleft
+            draw_tile_here(x, y, 'brick')
+
         ex, ey = self.current_level.exit_position
-        pg.draw.rect(screen, (0, 255, 0), pg.Rect((ex * TILE_SIZE, ey * TILE_SIZE), (TILE_SIZE, TILE_SIZE)))
+        draw_tile_here(ex * TILE_SIZE, ey * TILE_SIZE, 'exit')
+
         for elem in self.current_level.to_print:
             x, y = elem[0]
             x2, y2 = elem[1]
