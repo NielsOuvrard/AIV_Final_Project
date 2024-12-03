@@ -4,8 +4,8 @@
  # @ Description: Enemy class to represent an enemy in the game
  '''
 
-import pygame as pg
 from enum import Enum
+import pygame as pg
 from src.entities.entity import Entity
 from src.entities.player import Player
 
@@ -73,7 +73,7 @@ class Enemy(Entity):
         if self.target_in_range(5):
             self.change_state(EnemyState.ATTACKING)
 
-    def update_attacking(self, player: Player):
+    def update_attacking(self):
         """
         Behavior for the ATTACKING state.
         """

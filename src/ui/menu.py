@@ -59,7 +59,7 @@ class GameMenu(State):
         self.level_handler = LevelHandler()
         x, y = self.level_handler.current_level.start_position
         self.player: Player = Player((x * TILE_SIZE, y * TILE_SIZE))
-        self.enemies: list[Enemy] = [Enemy(pos) for pos in self.level_handler.current_level.enemies]
+        self.enemies: list[Enemy] = [Enemy(pos, self.player) for pos in self.level_handler.current_level.enemies]
 
     def update(self) -> None:
         self.player.animate(0.1)
