@@ -87,7 +87,7 @@ def snap_position(
         velocity.y = 0
 
 
-def handle_collision(level: Level, position: pg.Vector2, image: pg.Surface, velocity: pg.Vector2) -> None:
+def handle_collision(level: Level, position: pg.Vector2, image: pg.Surface, velocity: pg.Vector2) -> bool:
     """
     Handle collision with the level
     """
@@ -124,3 +124,14 @@ def handle_collision(level: Level, position: pg.Vector2, image: pg.Surface, velo
             tile.color = (0, 0, 255)
     if sides_colliding != set():
         snap_position(sides_colliding, objects_colliding, position, image, velocity)
+
+    for enemy in level.enemies:
+        object_to_collide = ObjectCollision(
+            enemy[0],
+            enemy[1],
+            int(image.get_width() * SCALING_FACTOR),
+            int(image.get_height() * SCALING_FACTOR)
+        )
+        if player.is_colliding(object_to_collide):
+            return False
+    return True
