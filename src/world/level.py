@@ -3,7 +3,7 @@
  # @ Create Time: 2024-11-12 19:40:33
  # @ Description:
  '''
-
+import time
 from math import sqrt
 from typing import Any
 from dataclasses import dataclass, field
@@ -13,6 +13,8 @@ import pygame as pg
 
 from src.config import TILE_SIZE
 from src.core import Graph, Node, dijkstra
+
+from src.game_states import MainState
 
 TOML_FILE = "assets/level.toml"
 
@@ -41,7 +43,7 @@ class Level:
     graph: Graph
     graph_result: dict[str, Node] = field(init=False)
     to_print: list[tuple[tuple[int, int], tuple[int, int]]] = field(default_factory=list)
-
+    finished: bool = False
 
     def __post_init__(self):
         x, y = self.start_position
@@ -63,8 +65,10 @@ class LevelHandler:
     """
     def __init__(self) -> None:
         self.levels: list[Level] = []
+        self.level_number = 0
+        self.game_over = False
         self.load_levels(TOML_FILE)
-        self.current_level: Level = self.levels[1]
+        self.current_level: Level = self.levels[self.level_number]
         self.world_image = pg.image.load("assets/world.png").convert_alpha()
         self.frames: dict[str, tuple[int, int]] = {}
         self.frame_dimensions: tuple[int, int]
@@ -192,6 +196,13 @@ class LevelHandler:
                 self.current_level = level
                 break
 
+    def next_level(self) -> None:
+        self.level_number += 1
+        if self.level_number < len(self.levels):
+            self.current_level = self.levels[self.level_number]
+        else:
+            self.game_over = True
+
     def draw(self, screen: pg.Surface) -> None:
         """
         Draw the level
@@ -210,9 +221,13 @@ class LevelHandler:
         ex, ey = self.current_level.exit_position
         draw_tile_here(ex * TILE_SIZE, ey * TILE_SIZE, 'exit')
 
-        for elem in self.current_level.to_print:
-            x, y = elem[0]
-            x2, y2 = elem[1]
-            pg.draw.line(screen, (0, 0, 255),
-                (x * TILE_SIZE + TILE_SIZE // 2, y * TILE_SIZE + TILE_SIZE // 2),
-                (x2 * TILE_SIZE + TILE_SIZE // 2, y2 * TILE_SIZE + TILE_SIZE // 2), 5)
+        if self.current_level.finished:
+            for elem in self.current_level.to_print:
+                x, y = elem[0]
+                x2, y2 = elem[1]
+                pg.draw.line(screen, (0, 0, 255),
+                    (x * TILE_SIZE + TILE_SIZE // 2, y * TILE_SIZE + TILE_SIZE // 2),
+                    (x2 * TILE_SIZE + TILE_SIZE // 2, y2 * TILE_SIZE + TILE_SIZE // 2), 5)
+                
+
+
