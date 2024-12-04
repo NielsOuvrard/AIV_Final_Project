@@ -61,13 +61,15 @@ class GameMenu(State):
         self.level_handler = LevelHandler()
         x, y = self.level_handler.current_level.start_position
         self.player: Player = Player((x * TILE_SIZE, y * TILE_SIZE))
-        self.enemies: list[Enemy] = [Enemy(pos) for pos in self.level_handler.current_level.enemies]
+        self.enemies: list[Enemy] = [Enemy(pos, self.player) for pos in self.level_handler.current_level.enemies]
 
     def update(self) -> None:
         self.player.animate(0.1)
         self.player.move_and_slide(self.level_handler.current_level)
         for enemy in self.enemies:
-            enemy.update(0.1, self.level_handler.current_level, self.player)
+            enemy.update(0.1, self.level_handler.current_level)
+        if not self.player.alive:
+            self.next_state = MainState.MAIN_MENU # todo put the end screen
 
     def draw(self, screen: pg.Surface) -> None:
         screen.fill(COLOR_BLACK)
@@ -79,13 +81,19 @@ class GameMenu(State):
     def handle_event(self, event: pg.event.Event) -> None:
         if event.type == pg.QUIT:
             self.next_state = MainState.QUIT
+
         if self.level_handler.last_level_finished:
             self.next_state = MainState.MAIN_MENU # todo put the end screen
         elif self.level_handler.current_level.is_finished:
-            time.sleep(2)
+
+            if self.level_handler.level_number == len(self.level_handler.levels) - 1:
+                time.sleep(0.5)
+            else:
+                time.sleep(2)
+
             self.level_handler.next_level()
             self.player.position = pg.Vector2(self.level_handler.current_level.start_position[0] * TILE_SIZE, self.level_handler.current_level.start_position[1] *TILE_SIZE)
-            self.enemies: list[Enemy] = [Enemy(pos) for pos in self.level_handler.current_level.enemies]
+            self.enemies: list[Enemy] = [Enemy(pos, self.player) for pos in self.level_handler.current_level.enemies]
         self.player.handle_event(event)
 
 class MainMenu(State):

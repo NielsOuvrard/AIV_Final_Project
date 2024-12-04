@@ -9,6 +9,7 @@ import pygame as pg
 
 from src.entities.entity import Entity
 from src.entities.player import Player
+from src.config import TILE_SIZE
 
 class EnemyState(Enum):
     """
@@ -23,11 +24,11 @@ class Enemy(Entity):
     """
     Enemy class with state machine implementation.
     """
-    def __init__(self, position: tuple[int, int]) -> None:
+    def __init__(self, position: tuple[int, int], player: Player) -> None:
         super().__init__("assets/enemies.png", "assets/enemies.toml", position)
-        self.target: Player | None = None
         self.state = EnemyState.IDLE
         self.health = 1
+        self.target = player
 
     def change_state(self, new_state: EnemyState):
         """
@@ -37,74 +38,47 @@ class Enemy(Entity):
             print(f"Transitioning from {self.state} to {new_state}")
             self.state = new_state
 
-    def update(self, dt: float, level, player: Player):
+    def update(self, dt: float, level) -> None:
         """
         Update the enemy's behavior based on its current state.
         """
+        def target_in_range(range_distance: int) -> bool:
+            """
+            Check if the target (player) is within a certain distance.
+            """
+            if self.target:
+                return (self.target.position - self.position).length() < range_distance
+            return False
+
+        def update_idle():
+            if target_in_range(5 * TILE_SIZE):
+                self.change_state(EnemyState.WALKING)
+
+        def update_walking():
+            direction = self.target.position - self.position
+            if direction.x > 0:
+                self.acceleration.x = 0.02
+            else:
+                self.acceleration.x = -0.02
+
+            if target_in_range(2):
+                self.change_state(EnemyState.ATTACKING)
+
+        def update_attacking():
+            if not target_in_range(7):
+                self.change_state(EnemyState.WALKING)
+
+        def update_dead():
+            self.current_animation = 'die'
+
         if self.state == EnemyState.IDLE:
-            self.update_idle()
+            update_idle()
         elif self.state == EnemyState.WALKING:
-            self.update_walking(player)
+            update_walking()
         elif self.state == EnemyState.ATTACKING:
-            self.update_attacking(player)
+            update_attacking()
         elif self.state == EnemyState.DEAD:
-            self.update_dead()
+            update_dead()
 
         self.animate(dt)
         self.move_and_slide(level)
-
-    def update_idle(self):
-        """
-        Behavior for the IDLE state.
-        """
-        self.change_animation('idle')
-        if self.target_in_range(30):
-            self.change_state(EnemyState.WALKING)
-
-    def update_walking(self, player: Player):
-        """
-        Behavior for the WALKING state.
-        """
-        self.change_animation('walking')
-        direction = player.position - self.position
-        if direction.length() > 0:
-            direction.normalize_ip()
-        self.velocity = direction * 2
-
-        if self.target_in_range(5):
-            self.change_state(EnemyState.ATTACKING)
-
-    def update_attacking(self, player: Player):
-        """
-        Behavior for the ATTACKING state.
-        """
-        self.change_animation('attacking')
-        self.velocity = pg.Vector2(0, 0)
-
-        if self.target_in_range(5):
-            player.take_damage(1)
-
-        if not self.target_in_range(5):
-            self.change_state(EnemyState.WALKING)
-
-    def update_dead(self):
-        """
-        Behavior for the DEAD state.
-        """
-        self.current_animation = 'die'
-
-    def target_in_range(self, range_distance: float) -> bool:
-        """
-        Check if the target (player) is within a certain distance.
-        """
-        if self.target:
-            return (self.target.position - self.position).length() < range_distance
-        return False
-
-    def take_damage(self, amount: int):
-        """
-        Handle taking damage, possibly transitioning to DEAD state.
-        """
-        self.health -= amount
-        if self.health <= 0:
-            self.change_state(EnemyState.DEAD)

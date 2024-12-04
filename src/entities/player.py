@@ -14,6 +14,7 @@ class Player(Entity):
     """
     def __init__(self, position: tuple[int, int]) -> None:
         super().__init__("assets/mario_bros.png", "assets/mario_bros.toml", position)
+        self.alive = True
 
     def handle_event(self, event: pg.event.Event):
         """
