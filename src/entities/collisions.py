@@ -3,7 +3,6 @@
  # @ Create Time: 2024-11-12 19:39:56
  # @ Description:
  '''
-
 from enum import Enum
 import pygame as pg
 
@@ -100,6 +99,15 @@ def handle_collision(level: Level, position: pg.Vector2, image: pg.Surface, velo
 
     sides_colliding: set[CornerSide] = set()
     objects_colliding = []
+
+    exit_tile = ObjectCollision(
+            level.exit_position[0] * TILE_SIZE,
+            level.exit_position[1]* TILE_SIZE,
+            TILE_SIZE,
+            TILE_SIZE
+        )
+    if player.is_colliding(exit_tile):
+        level.finished = True  
 
     for tile in level.tiles:
         object_to_collide = ObjectCollision(

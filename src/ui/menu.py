@@ -3,6 +3,7 @@
  # @ Create Time: 2024-11-12 19:19:49
  # @ Description:
  '''
+import time
 import pygame as pg
 
 from src.config import (
@@ -67,7 +68,8 @@ class GameMenu(State):
         for enemy in self.enemies:
             enemy.animate(0.1)
             enemy.move_and_slide(self.level_handler.current_level)
-
+            
+            
     def draw(self, screen: pg.Surface) -> None:
         screen.fill(COLOR_BLACK)
         self.player.draw(screen)
@@ -78,6 +80,14 @@ class GameMenu(State):
     def handle_event(self, event: pg.event.Event) -> None:
         if event.type == pg.QUIT:
             self.next_state = MainState.QUIT
+        if self.level_handler.game_over:
+            self.next_state = MainState.MAIN_MENU
+        elif self.level_handler.current_level.finished:
+            time.sleep(2)
+            # print("buenas")
+            self.level_handler.next_level()
+            self.player.position = pg.Vector2(self.level_handler.current_level.start_position[0] * TILE_SIZE, self.level_handler.current_level.start_position[1] *TILE_SIZE)
+            self.enemies: list[Enemy] = [Enemy(pos) for pos in self.level_handler.current_level.enemies]
         self.player.handle_event(event)
 
 class MainMenu(State):
