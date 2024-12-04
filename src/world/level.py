@@ -3,7 +3,7 @@
  # @ Create Time: 2024-11-12 19:40:33
  # @ Description:
  '''
-import time
+
 from math import sqrt
 from typing import Any
 from dataclasses import dataclass, field
@@ -44,6 +44,7 @@ class Level:
     graph_result: dict[str, Node] = field(init=False)
     to_print: list[tuple[tuple[int, int], tuple[int, int]]] = field(default_factory=list)
     finished: bool = False
+    is_player_alive = True
 
     def __post_init__(self):
         x, y = self.start_position
@@ -177,7 +178,6 @@ class LevelHandler:
                     tiles.append(Tile(get_local_x(i) * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, (255, 0, 0)))
                 elif tile == 'S':
                     local_exit_position = (get_local_x(i), y)
-
                 if tile not in ['\n', '#']:
                     local_graph[f'{get_local_x(i)}-{y}'] = self.get_neighbour(level_data['layout'], i, y, width)
 
@@ -207,6 +207,8 @@ class LevelHandler:
         """
         Draw the level
         """
+        if not self.current_level.is_player_alive:
+            self.game_over = True
         def draw_tile_here(x: int, y: int, name: str) -> None:
             brick_image = self.world_image.subsurface((*self.frames[name], *self.frame_dimensions))
             screen.blit(

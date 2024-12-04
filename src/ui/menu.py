@@ -81,11 +81,14 @@ class GameMenu(State):
         if self.level_handler.game_over:
             self.next_state = MainState.MAIN_MENU
         elif self.level_handler.current_level.finished:
-            time.sleep(2)
+            if self.level_handler.level_number == len(self.level_handler.levels)-1:
+                time.sleep(0.5)
+            else:
+                time.sleep(2)
             # print("buenas")
             self.level_handler.next_level()
             self.player.position = pg.Vector2(self.level_handler.current_level.start_position[0] * TILE_SIZE, self.level_handler.current_level.start_position[1] *TILE_SIZE)
-            self.enemies: list[Enemy] = [Enemy(pos) for pos in self.level_handler.current_level.enemies]
+            self.enemies: list[Enemy] = [Enemy(pos, self.player) for pos in self.level_handler.current_level.enemies]
         self.player.handle_event(event)
 
 class MainMenu(State):

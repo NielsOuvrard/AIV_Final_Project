@@ -123,3 +123,4 @@ def handle_collision(level: Level, position: pg.Vector2, image: pg.Surface, velo
             tile.color = (0, 0, 255)
     if sides_colliding != set():
         snap_position(sides_colliding, objects_colliding, position, image, velocity)
+        
