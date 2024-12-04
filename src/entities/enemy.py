@@ -18,7 +18,6 @@ class EnemyState(Enum):
     IDLE = 1
     WALKING = 2
     ATTACKING = 3
-    DEAD = 4
 
 class Enemy(Entity):
     """
@@ -67,17 +66,12 @@ class Enemy(Entity):
             if not target_in_range(7):
                 self.change_state(EnemyState.WALKING)
 
-        def update_dead():
-            self.current_animation = 'die'
-
         if self.state == EnemyState.IDLE:
             update_idle()
         elif self.state == EnemyState.WALKING:
             update_walking()
         elif self.state == EnemyState.ATTACKING:
             update_attacking()
-        elif self.state == EnemyState.DEAD:
-            update_dead()
 
         self.animate(dt)
         self.move_and_slide(level)

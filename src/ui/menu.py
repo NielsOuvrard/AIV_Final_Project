@@ -73,7 +73,7 @@ class GameMenu(State):
         self.player.alive = handle_entity_collision(self.player.position, self.player.image, self.enemies)
 
         if not self.player.alive:
-            self.next_state = MainState.MAIN_MENU # todo put the end screen
+            self.next_state = MainState.DEATH
 
     def draw(self, screen: pg.Surface) -> None:
         screen.fill(COLOR_BLACK)
@@ -87,7 +87,7 @@ class GameMenu(State):
             self.next_state = MainState.QUIT
 
         if self.level_handler.last_level_finished:
-            self.next_state = MainState.MAIN_MENU # todo put the end screen
+            self.next_state = MainState.DEATH
         elif self.level_handler.current_level.is_finished:
 
             if self.level_handler.level_number == len(self.level_handler.levels) - 1:
@@ -258,4 +258,48 @@ class Instructions(State):
             if self.back_button.rect.collidepoint(event.pos):
                 self.next_state = MainState.MAIN_MENU
         self.start_button.handle_event(event)
+        self.back_button.handle_event(event)
+
+class Death(State):
+    def __init__(self) -> None:
+        super().__init__()
+        self.title: str = "You Died"
+        self.title_font: pg.font.Font = pg.font.Font(FONT_NAME, int(FONT_SIZE * 1.5))
+        self.title_text: pg.Surface = self.title_font.render(self.title, True, COLOR_RED)
+        self.title_text_rect: pg.Rect = self.title_text.get_rect(center=(SCREEN_WIDTH // 2, 150))
+
+        self.play_button: Button = Button(
+            (SCREEN_WIDTH//2, 300),
+            "Play Again",
+            pg.font.Font(FONT_NAME, FONT_SIZE),
+            COLOR_WHITE,
+            COLOR_RED
+        )
+
+        self.back_button: Button = Button(
+            (SCREEN_WIDTH//2, 400),
+            "Back to menu",
+            pg.font.Font(FONT_NAME, FONT_SIZE),
+            COLOR_WHITE,
+            COLOR_RED
+        )
+
+    def update(self) -> None:
+        pass
+
+    def draw(self, screen: pg.Surface) -> None:
+        screen.fill(COLOR_BLACK)
+        screen.blit(self.title_text, self.title_text_rect)
+        self.play_button.draw(screen)
+        self.back_button.draw(screen)
+
+    def handle_event(self, event: pg.event.Event) -> None:
+        if event.type == MainState.QUIT:
+            self.next_state = MainState.MAIN_MENU
+        if event.type == pg.MOUSEBUTTONDOWN:
+            if self.play_button.rect.collidepoint(event.pos):
+                self.next_state = MainState.GAME
+            if self.back_button.rect.collidepoint(event.pos):
+                self.next_state = MainState.MAIN_MENU
+        self.play_button.handle_event(event)
         self.back_button.handle_event(event)
