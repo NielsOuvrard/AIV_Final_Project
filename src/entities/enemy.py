@@ -24,7 +24,6 @@ class Enemy(Entity):
     """
     def __init__(self, position: tuple[int, int], player: Player) -> None:
         super().__init__("assets/enemies.png", "assets/enemies.toml", position)
-        self.entity:str = "Enemy"
         self.target = player
         self.state = EnemyState.IDLE
         self.health = 1
@@ -50,7 +49,7 @@ class Enemy(Entity):
             self.update_dead()
 
         self.animate(dt)
-        super().move_and_slide(level, self.entity)
+        self.move_and_slide(level)
 
     def update_idle(self):
         """
@@ -65,9 +64,9 @@ class Enemy(Entity):
         """
         direction = player.position - self.position
         if direction.x > 0:
-            self.acceleration.x = 0.015
+            self.acceleration.x = 0.02
         else:
-            self.acceleration.x = -0.015
+            self.acceleration.x = -0.02
         if self.target_in_range(2):
             self.change_state(EnemyState.ATTACKING)
 
@@ -78,12 +77,6 @@ class Enemy(Entity):
 
         if not self.target_in_range(7):
             self.change_state(EnemyState.WALKING)
-
-    def update_dead(self):
-        """
-        Behavior for the DEAD state.
-        """
-        self.current_animation = 'die'
 
     def target_in_range(self, range_distance: int) -> bool:
         """

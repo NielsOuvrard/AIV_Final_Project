@@ -8,7 +8,6 @@ import pygame as pg
 
 from src.world.level import Level
 from src.config import SCALING_FACTOR, GRAVITY, TILE_SIZE
-# from src.entities.enemy import Enemy
 
 class CornerSide(Enum):
     TOP_LEFT = 0
@@ -87,7 +86,7 @@ def snap_position(
         velocity.y = 0
 
 
-def handle_collision(level: Level, position: pg.Vector2, image: pg.Surface, velocity: pg.Vector2, is_player: str) -> None:
+def handle_collision(level: Level, position: pg.Vector2, image: pg.Surface, velocity: pg.Vector2) -> None:
     """
     Handle collision with the level
     """
@@ -125,7 +124,7 @@ def handle_collision(level: Level, position: pg.Vector2, image: pg.Surface, velo
     if sides_colliding != set():
         snap_position(sides_colliding, objects_colliding, position, image, velocity)
 
-def handle_entity_collision(level: Level, position: pg.Vector2, image: pg.Surface,  enemies):
+def handle_entity_collision(level: Level, position: pg.Vector2, image: pg.Surface, enemies): 
         player = ObjectCollision(
             position.x,
             position.y,
