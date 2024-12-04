@@ -14,6 +14,7 @@ class Player(Entity):
     """
     def __init__(self, position: tuple[int, int]) -> None:
         super().__init__("assets/mario_bros.png", "assets/mario_bros.toml", position)
+        self.entity: str = "Player" 
 
     def handle_event(self, event: pg.event.Event):
         """
@@ -33,3 +34,6 @@ class Player(Entity):
         if event.type == pg.KEYUP:
             if event.key in {pg.K_RIGHT, pg.K_LEFT}:
                 self.acceleration.x = 0
+                
+    def move_and_slide(self, level):
+        return super().move_and_slide(level, self.entity)

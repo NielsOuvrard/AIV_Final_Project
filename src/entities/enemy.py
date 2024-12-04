@@ -24,6 +24,7 @@ class Enemy(Entity):
     """
     def __init__(self, position: tuple[int, int], player: Player) -> None:
         super().__init__("assets/enemies.png", "assets/enemies.toml", position)
+        self.entity:str = "Enemy"
         self.target = player
         self.state = EnemyState.IDLE
         self.health = 1
@@ -50,7 +51,7 @@ class Enemy(Entity):
             self.update_dead()
 
         self.animate(dt)
-        self.move_and_slide(level)
+        super().move_and_slide(level, self.entity)
 
     def update_idle(self):
         """
