@@ -8,6 +8,7 @@ import pygame as pg
 
 from src.world.level import Level
 from src.config import SCALING_FACTOR, GRAVITY, TILE_SIZE
+# from src.entities.enemy import Enemy
 
 class CornerSide(Enum):
     TOP_LEFT = 0
@@ -124,14 +125,20 @@ def handle_collision(level: Level, position: pg.Vector2, image: pg.Surface, velo
     if sides_colliding != set():
         snap_position(sides_colliding, objects_colliding, position, image, velocity)
 
-    if is_player == "Player":
-        for enemy in level.enemies:
-            object_to_collide = ObjectCollision(
-                enemy[0],
-                enemy[1],
-                int(image.get_width() * SCALING_FACTOR),
-                int(image.get_height() * SCALING_FACTOR)
-            )
-            if player.is_colliding(object_to_collide):
+def handle_entity_collision(level: Level, position: pg.Vector2, image: pg.Surface,  enemies):
+        player = ObjectCollision(
+            position.x,
+            position.y,
+            int(image.get_width() * SCALING_FACTOR),
+            int(image.get_height() * SCALING_FACTOR)
+        )
+
+        for e in enemies:
+            enemy = ObjectCollision(
+                    e.position.x,
+                    e.position.y,
+                    int(e.image.get_width() * SCALING_FACTOR),
+                    int(e.image.get_height() * SCALING_FACTOR)
+                )
+            if player.is_colliding(enemy):
                 level.is_player_alive = False
-        

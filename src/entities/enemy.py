@@ -34,7 +34,6 @@ class Enemy(Entity):
         Change the current state of the enemy.
         """
         if self.state != new_state:  # Avoid redundant state changes
-            print(f"Transitioning from {self.state} to {new_state}")
             self.state = new_state
 
     def update(self, dt: float, level, player: Player):
@@ -66,9 +65,9 @@ class Enemy(Entity):
         """
         direction = player.position - self.position
         if direction.x > 0:
-            self.acceleration.x = 0.02
+            self.acceleration.x = 0.015
         else:
-            self.acceleration.x = -0.02
+            self.acceleration.x = -0.015
         if self.target_in_range(2):
             self.change_state(EnemyState.ATTACKING)
 
