@@ -21,6 +21,7 @@ from src.entities.enemy import Enemy
 from src.game_states import MainState, State
 from src.entities.player import Player
 from src.world.level import LevelHandler
+from src.entities.collisions import handle_entity_collision
 
 class Button: # pylint: disable=too-many-arguments, too-many-positional-arguments
     """
@@ -68,6 +69,9 @@ class GameMenu(State):
         self.player.move_and_slide(self.level_handler.current_level)
         for enemy in self.enemies:
             enemy.update(0.1, self.level_handler.current_level)
+
+        self.player.alive = handle_entity_collision(self.player.position, self.player.image, self.enemies)
+
         if not self.player.alive:
             self.next_state = MainState.MAIN_MENU # todo put the end screen
 

@@ -60,7 +60,7 @@ class Entity(pg.sprite.Sprite):
                 frames.append(frame)
             self.animations[animation_name] = frames
 
-    def move_and_slide(self, level: Level) -> bool:
+    def move_and_slide(self, level: Level) -> None:
         """
         Move the player character and apply gravity
         """
@@ -82,7 +82,7 @@ class Entity(pg.sprite.Sprite):
             self.change_animation('idle')
             self.velocity.x = 0
 
-        return handle_collision(level, self.position, self.image, self.velocity)
+        handle_collision(level, self.position, self.image, self.velocity)
 
     def animate(self, dt: float):
         """

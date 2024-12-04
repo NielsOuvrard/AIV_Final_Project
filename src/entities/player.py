@@ -34,6 +34,3 @@ class Player(Entity):
         if event.type == pg.KEYUP:
             if event.key in {pg.K_RIGHT, pg.K_LEFT}:
                 self.acceleration.x = 0
-
-    def move_and_slide(self, level):
-        self.alive = super().move_and_slide(level)
