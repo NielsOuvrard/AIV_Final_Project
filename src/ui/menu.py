@@ -103,7 +103,7 @@ class MainMenu(State):
     """
     def __init__(self) -> None:
         super().__init__()
-        self.title: str = "Main Menu"
+        self.title: str = "Plumber's Puzzle"
         self.title_font: pg.font.Font = pg.font.Font(FONT_NAME, int(FONT_SIZE * 1.5))
         self.title_text: pg.Surface = self.title_font.render(self.title, True, COLOR_WHITE)
         self.title_text_rect: pg.Rect = self.title_text.get_rect(center=(SCREEN_WIDTH // 2, 100))

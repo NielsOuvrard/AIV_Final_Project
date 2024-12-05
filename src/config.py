@@ -8,7 +8,7 @@
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 SCREEN_SIZE = (SCREEN_WIDTH, SCREEN_HEIGHT)
-WINDOW_TITLE = 'Mario Bros'
+WINDOW_TITLE = "Plumber's Puzzle"
 
 # Font settings
 FONT_NAME = None  # Default font
