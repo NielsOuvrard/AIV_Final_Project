@@ -232,6 +232,11 @@ class Instructions(State):
         self.controls_text: pg.Surface = self.controls_font.render(self.controls, True, COLOR_WHITE)
         self.controls_text_rect: pg.Rect = self.controls_text.get_rect(center=(SCREEN_WIDTH // 2, 250))
 
+        self.kills: str = "Kill the enemies by jumping on them!"
+        self.kills_font: pg.font.Font = pg.font.Font(FONT_NAME, int(FONT_BUTTON_SIZE))
+        self.kills_text: pg.Surface = self.kills_font.render(self.kills, True, COLOR_WHITE)
+        self.kills_text_rect: pg.Rect = self.kills_text.get_rect(center=(SCREEN_WIDTH // 2, 300))
+
         self.start_button: Button = Button(
             (SCREEN_WIDTH//2, 400),
             "Start",
@@ -256,6 +261,7 @@ class Instructions(State):
         screen.blit(self.title_text, self.title_text_rect)
         screen.blit(self.instructions_text, self.instructions_text_rect)
         screen.blit(self.controls_text, self.controls_text_rect)
+        screen.blit(self.kills_text, self.kills_text_rect)
         self.start_button.draw(screen)
         self.back_button.draw(screen)
 
