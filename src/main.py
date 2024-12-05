@@ -15,6 +15,7 @@ if __name__ == '__main__':
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption(WINDOW_TITLE)
 
+    level = 0
     actualState: State = MainMenu()
 
     running: bool = True
@@ -24,9 +25,12 @@ if __name__ == '__main__':
 
         actualState.update()
         actualState.draw(screen)
+        if hasattr(actualState, 'next_level'):
+            # if die, restart the current level
+            level = actualState.next_level
 
         if actualState.next_state == MainState.GAME:
-            actualState = GameMenu()
+            actualState = GameMenu(level)
         elif actualState.next_state == MainState.MAIN_MENU:
             actualState = MainMenu()
         elif actualState.next_state == MainState.CREDITS:

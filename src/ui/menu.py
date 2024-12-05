@@ -56,13 +56,14 @@ class GameMenu(State):
     """
     Game menu class to represent the game menu
     """
-    def __init__(self) -> None:
+    def __init__(self, level_number: int) -> None:
         super().__init__()
         self.next_state: MainState | None = None
-        self.level_handler = LevelHandler()
+        self.level_handler = LevelHandler(level_number)
         x, y = self.level_handler.current_level.start_position
         self.player: Player = Player((x * TILE_SIZE, y * TILE_SIZE))
         self.enemies: list[Enemy] = [Enemy(pos, self.player) for pos in self.level_handler.current_level.enemies]
+        self.next_level = level_number
 
     def update(self) -> None:
         self.player.animate(0.1)
@@ -75,6 +76,7 @@ class GameMenu(State):
         self.player.alive = handle_entity_collision(self.player.position, self.player.image, self.enemies)
 
         if not self.player.alive:
+            self.next_level = self.level_handler.level_number
             self.next_state = MainState.DEATH
 
     def draw(self, screen: pg.Surface) -> None:
@@ -89,7 +91,7 @@ class GameMenu(State):
             self.next_state = MainState.QUIT
 
         if self.level_handler.last_level_finished:
-            self.next_state = MainState.DEATH
+            self.next_state = MainState.MAIN_MENU
         elif self.level_handler.current_level.is_finished:
 
             if self.level_handler.level_number == len(self.level_handler.levels) - 1:

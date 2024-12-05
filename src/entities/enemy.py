@@ -68,13 +68,13 @@ class Enemy(Entity):
             else:
                 self.acceleration.x = -0.02
 
-            if target_in_range(4 * TILE_SIZE):
+            if target_in_range(2 * TILE_SIZE):
                 self.change_state(EnemyState.ATTACKING)
 
         def update_attacking():
             # the attack state is only for the animation
             self.change_animation('attack')
-            if not target_in_range(4 * TILE_SIZE):
+            if not target_in_range(2 * TILE_SIZE):
                 self.change_state(EnemyState.WALKING)
 
         if self.state == EnemyState.IDLE:

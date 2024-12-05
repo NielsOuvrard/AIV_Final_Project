@@ -60,9 +60,9 @@ class LevelHandler:
     """
     Level class to represent the level
     """
-    def __init__(self) -> None:
+    def __init__(self, level_number: int) -> None:
         self.levels: list[Level] = []
-        self.level_number = 0
+        self.level_number = level_number
         self.last_level_finished = False
         self.load_levels(TOML_FILE)
         self.current_level: Level = self.levels[self.level_number]
