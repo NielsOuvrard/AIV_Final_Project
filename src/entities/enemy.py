@@ -35,7 +35,6 @@ class Enemy(Entity):
         Change the current state of the enemy.
         """
         if self.state != new_state:  # Avoid redundant state changes
-            print(f"Transitioning from {self.state} to {new_state}")
             self.state = new_state
 
     def update(self, dt: float, level) -> None:
@@ -57,7 +56,7 @@ class Enemy(Entity):
         def update_walking():
             direction = self.target.position - self.position
             if direction.x > 0:
-                self.acceleration.x = 0.02
+                self.acceleration.x = 0.015
             else:
                 self.acceleration.x = -0.02
 

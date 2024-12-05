@@ -12,7 +12,7 @@ import toml
 import pygame as pg
 
 from src.config import TILE_SIZE
-from src.core import Graph, Node, dijkstra
+from src.core import Graph, dijkstra
 
 TOML_FILE = "assets/level.toml"
 
@@ -228,4 +228,3 @@ class LevelHandler:
 
         if self.current_level.is_finished:
             draw_dijkstra_result()
-
