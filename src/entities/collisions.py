@@ -121,7 +121,6 @@ def handle_collision(level: Level, position: pg.Vector2, image: pg.Surface, velo
         if local_colliding != set():
             sides_colliding.update(local_colliding)
             objects_colliding.append(object_to_collide)
-            tile.color = (0, 0, 255)
     if sides_colliding != set():
         snap_position(sides_colliding, objects_colliding, position, image, velocity)
 
@@ -136,13 +135,21 @@ def handle_entity_collision(position: pg.Vector2, image: pg.Surface, enemies: li
         int(image.get_height() * SCALING_FACTOR)
     )
 
+    # this import is here to avoid circular imports
+    from .enemy import EnemyState # pylint: disable=import-outside-toplevel
     for e in enemies:
+        if e.state == EnemyState.DYING:
+            continue
         enemy = ObjectCollision(
                 e.position.x,
                 e.position.y,
                 int(e.image.get_width() * SCALING_FACTOR),
                 int(e.image.get_height() * SCALING_FACTOR)
             )
-        if player.is_colliding(enemy):
-            return False
+        local_colliding = player.is_colliding(enemy)
+        if local_colliding != set():
+            if CornerSide.TOP_LEFT not in local_colliding and CornerSide.TOP_RIGHT not in local_colliding:
+                e.kill()
+            else:
+                return False # player is dead
     return True

@@ -17,7 +17,7 @@ from src.config import (
     COLOR_RED,
     TILE_SIZE
 )
-from src.entities.enemy import Enemy
+from src.entities.enemy import Enemy, EnemyState
 from src.game_states import MainState, State
 from src.entities.player import Player
 from src.world.level import LevelHandler
@@ -69,6 +69,8 @@ class GameMenu(State):
         self.player.move_and_slide(self.level_handler.current_level)
         for enemy in self.enemies:
             enemy.update(0.1, self.level_handler.current_level)
+            if enemy.state == EnemyState.DYING and enemy.frame_remains == 0:
+                self.enemies.remove(enemy)
 
         self.player.alive = handle_entity_collision(self.player.position, self.player.image, self.enemies)
 
@@ -250,8 +252,8 @@ class Instructions(State):
         self.back_button.draw(screen)
 
     def handle_event(self, event: pg.event.Event) -> None:
-        if event.type == MainState.QUIT:
-            self.next_state = MainState.MAIN_MENU
+        if event.type == pg.QUIT:
+            self.next_state = MainState.QUIT
         if event.type == pg.MOUSEBUTTONDOWN:
             if self.start_button.rect.collidepoint(event.pos):
                 self.next_state = MainState.GAME
@@ -294,8 +296,8 @@ class Death(State):
         self.back_button.draw(screen)
 
     def handle_event(self, event: pg.event.Event) -> None:
-        if event.type == MainState.QUIT:
-            self.next_state = MainState.MAIN_MENU
+        if event.type == pg.QUIT:
+            self.next_state = MainState.QUIT
         if event.type == pg.MOUSEBUTTONDOWN:
             if self.play_button.rect.collidepoint(event.pos):
                 self.next_state = MainState.GAME
