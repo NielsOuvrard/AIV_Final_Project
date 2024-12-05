@@ -15,13 +15,15 @@ from src.config import (
     COLOR_BLACK,
     COLOR_WHITE,
     COLOR_RED,
-    TILE_SIZE
+    TILE_SIZE,
+    COLOR_GREEN
 )
 from src.entities.enemy import Enemy, EnemyState
 from src.game_states import MainState, State
 from src.entities.player import Player
 from src.world.level import LevelHandler
 from src.entities.collisions import handle_entity_collision
+
 
 class Button: # pylint: disable=too-many-arguments, too-many-positional-arguments
     """
@@ -51,6 +53,7 @@ class Button: # pylint: disable=too-many-arguments, too-many-positional-argument
     def handle_event(self, event: pg.event.Event) -> None:
         if event.type == pg.MOUSEMOTION:
             self.hovered = self.rect.collidepoint(event.pos)
+
 
 class GameMenu(State):
     """
@@ -91,7 +94,7 @@ class GameMenu(State):
             self.next_state = MainState.QUIT
 
         if self.level_handler.last_level_finished:
-            self.next_state = MainState.MAIN_MENU
+            self.next_state = MainState.WIN
         elif self.level_handler.current_level.is_finished:
 
             if self.level_handler.level_number == len(self.level_handler.levels) - 1:
@@ -103,6 +106,7 @@ class GameMenu(State):
             self.player.position = pg.Vector2(self.level_handler.current_level.start_position[0] * TILE_SIZE, self.level_handler.current_level.start_position[1] *TILE_SIZE)
             self.enemies: list[Enemy] = [Enemy(pos, self.player) for pos in self.level_handler.current_level.enemies]
         self.player.handle_event(event)
+
 
 class MainMenu(State):
     """
@@ -161,6 +165,7 @@ class MainMenu(State):
         self.quit_button.handle_event(event)
         self.credits_button.handle_event(event)
 
+
 class Credits(State):
     """
     Credits class to represent the credits screen of the game
@@ -204,6 +209,7 @@ class Credits(State):
             if self.exit_button.rect.collidepoint(event.pos):
                 self.next_state = MainState.MAIN_MENU
         self.exit_button.handle_event(event)
+
 
 class Instructions(State):
     """
@@ -264,6 +270,7 @@ class Instructions(State):
         self.start_button.handle_event(event)
         self.back_button.handle_event(event)
 
+
 class Death(State):
     def __init__(self) -> None:
         super().__init__()
@@ -283,6 +290,53 @@ class Death(State):
         self.back_button: Button = Button(
             (SCREEN_WIDTH//2, 400),
             "Back to menu",
+            pg.font.Font(FONT_NAME, FONT_SIZE),
+            COLOR_WHITE,
+            COLOR_RED
+        )
+
+    def update(self) -> None:
+        pass
+
+    def draw(self, screen: pg.Surface) -> None:
+        screen.fill(COLOR_BLACK)
+        screen.blit(self.title_text, self.title_text_rect)
+        self.play_button.draw(screen)
+        self.back_button.draw(screen)
+
+    def handle_event(self, event: pg.event.Event) -> None:
+        if event.type == pg.QUIT:
+            self.next_state = MainState.QUIT
+        if event.type == pg.MOUSEBUTTONDOWN:
+            if self.play_button.rect.collidepoint(event.pos):
+                self.next_state = MainState.GAME
+            if self.back_button.rect.collidepoint(event.pos):
+                self.next_state = MainState.MAIN_MENU
+        self.play_button.handle_event(event)
+        self.back_button.handle_event(event)
+
+class Win(State):
+    """
+    Win class to represent the win screen of the game
+    """
+    def __init__(self) -> None:
+        super().__init__()
+        self.title: str = "You Win!"
+        self.title_font: pg.font.Font = pg.font.Font(FONT_NAME, int(FONT_SIZE * 1.5))
+        self.title_text: pg.Surface = self.title_font.render(self.title, True, COLOR_GREEN)
+        self.title_text_rect: pg.Rect = self.title_text.get_rect(center=(SCREEN_WIDTH // 2, 150))
+
+        self.play_button: Button = Button(
+            (SCREEN_WIDTH // 2, 300),
+            "Play Again",
+            pg.font.Font(FONT_NAME, FONT_SIZE),
+            COLOR_WHITE,
+            COLOR_RED
+        )
+
+        self.back_button: Button = Button(
+            (SCREEN_WIDTH // 2, 400),
+            "Back to Menu",
             pg.font.Font(FONT_NAME, FONT_SIZE),
             COLOR_WHITE,
             COLOR_RED

@@ -6,7 +6,7 @@
 
 import pygame
 from src.config import SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_TITLE
-from src.ui.menu import MainMenu, GameMenu, Credits, Instructions, Death
+from src.ui.menu import MainMenu, GameMenu, Credits, Instructions, Death, Win
 from src.game_states import MainState, State
 
 
@@ -41,6 +41,9 @@ if __name__ == '__main__':
             actualState = Death()
         elif actualState.next_state == MainState.QUIT:
             running = False # pylint: disable=invalid-name
+        elif actualState.next_state == MainState.WIN:
+            actualState = Win()
+            level = 0
 
         pygame.display.flip()
 

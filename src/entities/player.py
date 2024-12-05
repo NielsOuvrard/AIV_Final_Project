@@ -24,7 +24,7 @@ class Player(Entity):
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_SPACE:
                 self.change_animation('jump')
-                self.acceleration.y = -5
+                self.acceleration.y = -2.5
             if event.key == pg.K_RIGHT:
                 self.change_animation('walk')
                 self.acceleration.x = 0.04
