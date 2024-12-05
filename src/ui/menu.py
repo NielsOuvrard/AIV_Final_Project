@@ -14,6 +14,7 @@ from src.config import (
     COLOR_BLACK,
     COLOR_WHITE,
     COLOR_RED,
+    COLOR_GREEN,
     TILE_SIZE
 )
 from src.entities.enemy import Enemy
@@ -81,7 +82,11 @@ class GameMenu(State):
         if event.type == pg.QUIT:
             self.next_state = MainState.QUIT
         if self.level_handler.game_over:
-            self.next_state = MainState.DEATH
+            if self.level_handler.current_level.is_player_alive:
+                self.next_state = MainState.WIN
+            else:
+                self.next_state = MainState.DEATH
+
         elif self.level_handler.current_level.finished:
             if self.level_handler.level_number == len(self.level_handler.levels)-1:
                 time.sleep(0.5)
@@ -294,4 +299,36 @@ class Death(State):
             if self.back_button.rect.collidepoint(event.pos):
                 self.next_state = MainState.MAIN_MENU
         self.play_button.handle_event(event)
+        self.back_button.handle_event(event)
+class Win(State):
+    def __init__(self) -> None:
+        super().__init__()
+        self.title: str = "You WIN"
+        self.title_font: pg.font.Font = pg.font.Font(FONT_NAME, int(FONT_SIZE * 1.5))
+        self.title_text: pg.Surface = self.title_font.render(self.title, True, COLOR_GREEN)
+        self.title_text_rect: pg.Rect = self.title_text.get_rect(center=(SCREEN_WIDTH // 2, 150))
+
+
+        self.back_button: Button = Button(
+            (SCREEN_WIDTH//2, 250),
+            "Back to menu",
+            pg.font.Font(FONT_NAME, FONT_SIZE),
+            COLOR_WHITE,
+            COLOR_RED
+        )
+
+    def update(self) -> None:
+        pass
+
+    def draw(self, screen: pg.Surface) -> None:
+        screen.fill(COLOR_BLACK)
+        screen.blit(self.title_text, self.title_text_rect)
+        self.back_button.draw(screen)
+
+    def handle_event(self, event: pg.event.Event) -> None:
+        if event.type == MainState.QUIT:
+            self.next_state = MainState.MAIN_MENU
+        if event.type == pg.MOUSEBUTTONDOWN:
+            if self.back_button.rect.collidepoint(event.pos):
+                self.next_state = MainState.MAIN_MENU
         self.back_button.handle_event(event)

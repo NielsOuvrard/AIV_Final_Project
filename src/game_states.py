@@ -17,6 +17,7 @@ class MainState(Enum):
     QUIT = 3
     INSTRUCTIONS = 4
     DEATH = 5
+    WIN = 6
 
 class State:
     """
