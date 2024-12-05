@@ -39,15 +39,15 @@ class Level:
     enemies: list[tuple[int, int]]
     exit_position: tuple[int, int]
     graph: Graph
-    graph_result: dict[str, Node] = field(init=False)
     to_print: list[tuple[tuple[int, int], tuple[int, int]]] = field(default_factory=list)
+    is_finished: bool = False
 
     def __post_init__(self):
         x, y = self.start_position
-        self.graph_result = dijkstra(self.graph, f'{x}-{y}')
+        graph_result = dijkstra(self.graph, f'{x}-{y}')
 
         ex, ey = self.exit_position
-        solution = self.graph_result[f'{ex}-{ey}'].path
+        solution = graph_result[f'{ex}-{ey}'].path
         solution.append(f'{ex}-{ey}')
 
         last = self.start_position
@@ -62,8 +62,10 @@ class LevelHandler:
     """
     def __init__(self) -> None:
         self.levels: list[Level] = []
+        self.level_number = 0
+        self.last_level_finished = False
         self.load_levels(TOML_FILE)
-        self.current_level: Level = self.levels[0]
+        self.current_level: Level = self.levels[self.level_number]
         self.world_image = pg.image.load("assets/world.png").convert_alpha()
         self.frames: dict[str, tuple[int, int]] = {}
         self.frame_dimensions: tuple[int, int]
@@ -191,10 +193,25 @@ class LevelHandler:
                 self.current_level = level
                 break
 
+    def next_level(self) -> None:
+        self.level_number += 1
+        if self.level_number < len(self.levels):
+            self.current_level = self.levels[self.level_number]
+        else:
+            self.last_level_finished = True
+
     def draw(self, screen: pg.Surface) -> None:
         """
         Draw the level
         """
+        def draw_dijkstra_result() -> None:
+            for elem in self.current_level.to_print:
+                x, y = elem[0]
+                x2, y2 = elem[1]
+                pg.draw.line(screen, (0, 0, 255),
+                    (x * TILE_SIZE + TILE_SIZE // 2, y * TILE_SIZE + TILE_SIZE // 2),
+                    (x2 * TILE_SIZE + TILE_SIZE // 2, y2 * TILE_SIZE + TILE_SIZE // 2), 5)
+
         def draw_tile_here(x: int, y: int, name: str) -> None:
             brick_image = self.world_image.subsurface((*self.frames[name], *self.frame_dimensions))
             screen.blit(
@@ -209,9 +226,6 @@ class LevelHandler:
         ex, ey = self.current_level.exit_position
         draw_tile_here(ex * TILE_SIZE, ey * TILE_SIZE, 'exit')
 
-        for elem in self.current_level.to_print:
-            x, y = elem[0]
-            x2, y2 = elem[1]
-            pg.draw.line(screen, (0, 0, 255),
-                (x * TILE_SIZE + TILE_SIZE // 2, y * TILE_SIZE + TILE_SIZE // 2),
-                (x2 * TILE_SIZE + TILE_SIZE // 2, y2 * TILE_SIZE + TILE_SIZE // 2), 5)
+        if self.current_level.is_finished:
+            draw_dijkstra_result()
+

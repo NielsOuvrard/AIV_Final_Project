@@ -101,6 +101,15 @@ def handle_collision(level: Level, position: pg.Vector2, image: pg.Surface, velo
     sides_colliding: set[CornerSide] = set()
     objects_colliding = []
 
+    exit_tile = ObjectCollision(
+            level.exit_position[0] * TILE_SIZE,
+            level.exit_position[1] * TILE_SIZE,
+            TILE_SIZE,
+            TILE_SIZE
+        )
+    if player.is_colliding(exit_tile):
+        level.is_finished = True
+
     for tile in level.tiles:
         object_to_collide = ObjectCollision(
             tile.rect.x,
